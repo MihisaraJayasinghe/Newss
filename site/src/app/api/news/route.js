@@ -1,15 +1,18 @@
 import mongoose from 'mongoose';
+ 
 import dbConnect from '../../../../lib/mongodb'; // Adjust the path to your database connection utility
 import News from '../../../../model/model'; // Adjust the path to your News model
 
-// Handle GET request to fetch all news articles
+// Handle GET request to fetch news articles (all, pinned, or by id)
 export async function GET(req) {
   await dbConnect();
   
   try {
     const { searchParams } = new URL(req.url);
-    const isPinned = searchParams.get('pinned'); // Check if pinned news is requested
+    const isPinned = searchParams.get('pinned');
+    const newsId = searchParams.get('id'); // Get the news ID from the query parameters
 
+    // Fetch pinned news
     if (isPinned === 'true') {
       const pinnedNews = await News.findOne({ stype: 'pinned' });
       return new Response(JSON.stringify({ success: true, data: pinnedNews }), {
@@ -18,6 +21,32 @@ export async function GET(req) {
       });
     }
 
+    // Fetch news by ID
+    if (newsId) {
+      // Check if the ID is valid
+      if (!mongoose.Types.ObjectId.isValid(newsId)) {
+        return new Response(JSON.stringify({ success: false, message: 'Invalid news ID' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      const newsItem = await News.findById(newsId);
+      
+      if (!newsItem) {
+        return new Response(JSON.stringify({ success: false, message: 'News article not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, data: newsItem }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // If no query params, return all news
     const news = await News.find({});
     return new Response(JSON.stringify({ success: true, data: news }), {
       status: 200,
@@ -37,7 +66,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { title, content, category, author, imageUrl, videoUrl ,tag} = body;
+    const { title, content, category, author, imageUrl, videoUrl ,tag } = body;
 
     const news = new News({
       title,
@@ -63,7 +92,6 @@ export async function POST(req) {
   }
 }
 
-// Handle PATCH request to pin/unpin a news article (set stype)
 // Handle PATCH request to pin/unpin a news article
 export async function PATCH(req) {
   await dbConnect();

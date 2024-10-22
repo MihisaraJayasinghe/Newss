@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Header from '../../components/header';
 import Navbar from '../../components/navbar';
 import Sidebar from '../../components/sidesbars'; // Left sidebar with news items
@@ -20,6 +21,10 @@ export default function NewsPage() {
     videoUrl: '',
     tag: '', // Added tag field
   });
+
+  const handleNewsClick = (id) => {
+    router.push(`/news/${id}`);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,7 +91,8 @@ export default function NewsPage() {
   // Filter the Pradana Puwath articles and separate the pinned one
   const pradanaPuwathNews = newsItems.filter((item) => item.tag.includes('Pradana Puwath'));
   const nonPinnedPradanaPuwathNews = pradanaPuwathNews.filter((item) => item.stype !== 'pinned');
-  
+  const nonsPinnedPradanaPuwathNewss = newsItems.filter((item) => item.stype !== 'pinned');
+
   const sidebarNewsItems = newsItems.filter((item) => item.tag.includes('Unusum Puwath'));
   
   // Function to filter news by time (less than 24 hours ago)
@@ -106,7 +112,9 @@ export default function NewsPage() {
         {/* Sidebar - Left */}
         <div className="w-full lg:w-1/5 p-4 bg-gray-200 m-5 rounded-lg">
           <a className="text-2xl font-bold">Unusum Puwath</a>
-          <Sidebar newsItems={sidebarNewsItems} />
+          <Sidebar newsItems={sidebarNewsItems} 
+          
+           onNewsClick={handleNewsClick} />
         </div>
 
         {/* Main News Section and News Grid - Center */}
@@ -154,7 +162,9 @@ export default function NewsPage() {
           {/* News Grid Section for "Pradana Puwath" */}
           <div className="border-2 border-black p-6 bg-white rounded-md shadow-md">
             <h2 className="text-2xl font-bold mb-4">Pradana Puwath</h2>
-            <NewsSection newsItems={nonPinnedPradanaPuwathNews} />
+            <NewsSection newsItems={nonPinnedPradanaPuwathNews}
+              
+             onClick={handleNewsClick}  />
           </div>
 
           {/* News Grid Section for "Wigasa Puwath" */}
@@ -196,6 +206,17 @@ export default function NewsPage() {
                   value={formData.tag}
                   onChange={(e) => setFormData({ ...formData, tag: e.target.value.split(',') })}
                   className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Acuthor</label>
+                <input
+                  type="text"
+                  name="acuthor"
+                  value={formData.ca}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  required
                 />
               </div>
               <div>
@@ -243,8 +264,8 @@ export default function NewsPage() {
         <div className=" w-1/5 bg-gray-100 p-4">
         <h3 className="font-bold text-lg mb-4">Other News</h3>
 
-{nonPinnedPradanaPuwathNews.length > 0 ? (
-  nonPinnedPradanaPuwathNews.map((item, index) => (
+{nonsPinnedPradanaPuwathNewss.length > 0 ? (
+  nonsPinnedPradanaPuwathNewss.map((item, index) => (
     <div key={index} className="mb-4">
       <h4 className="font-semibold text-sm mb-2">{item.title}</h4>
       <p className="text-gray-600">
