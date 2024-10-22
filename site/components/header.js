@@ -3,9 +3,10 @@ export default function Header() {
       <header className="flex h-30  border-b-1 border-black border-solid justify-center justify-items-center sticky top-0  mt-auto mb-automl-auto mr-auto bg-white stroke-slate-50 p-4">
          
         <div className="text-center justify-center w-screen ">
+          <a href = '/'>
           <h1 className="text-2xl mt- text-center font-light">NEWS WEB</h1>
           <p className=" absolute l-0 top-0 text-xl mt-5">October 11, 2024</p>
-         
+          </a>
         </div>
         <div className=" sm:hi absolute  right-0  ">
           {/* <input

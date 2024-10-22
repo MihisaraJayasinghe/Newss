@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+ 
 import { useRouter } from 'next/router';
 import Header from '../../components/header';
 import Navbar from '../../components/navbar';
@@ -7,6 +8,7 @@ import Sidebar from '../../components/sidesbars'; // Left sidebar with news item
 import NewsSection from '../../components/newssecsection'; // Middle section
 import ReactPlayer from 'react-player';
 import dayjs from 'dayjs'; // Library to handle date operations
+import Link from 'next/link';
 
 export default function NewsPage() {
   const [newsItems, setNewsItems] = useState([]);
@@ -120,8 +122,10 @@ export default function NewsPage() {
         {/* Main News Section and News Grid - Center */}
         <div className="flex-1   bg-gray-200 p-4">
           {/* Pinned News Section */}
+         
           {pinnedNewsItem && (
             <div className="mb-6 p-6 bg-white border-4 border-blue-500 rounded-lg shadow-md">
+               <Link   href={`/newsdetail/${pinnedNewsItem._id}`} passHref> 
               <h2 className="text-xl font-bold text-gray-800 mb-4">Main News</h2>
               <h2 className="text-3xl font-bold mb-4">{pinnedNewsItem.title}</h2>
               <div className="flex flex-col md:flex-row gap-4">
@@ -146,19 +150,17 @@ export default function NewsPage() {
                 )}
                 <div className="flex-1">
                   <p className="text-gray-600">{pinnedNewsItem.content.substring(0, 200)}...</p>
-
-                  {/* Unpin Button */}
-                  <button
-                    className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                    onClick={() => setPinnedNewsItem(null)}
-                  >
-                    Unpin
-                  </button>
+ 
                 </div>
+           
               </div>
+              </Link>
+               
             </div>
+          
           )}
-
+     
+ 
           {/* News Grid Section for "Pradana Puwath" */}
           <div className="border-2 border-black p-6 bg-white rounded-md shadow-md">
             <h2 className="text-2xl font-bold mb-4">Pradana Puwath</h2>
