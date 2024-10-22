@@ -1,10 +1,10 @@
 export default function Header() {
     return (
-      <header className="flex h-40  border-b-1 border-black border-solid justify-center justify-items-center sticky top-0  mt-auto mb-automl-auto mr-auto bg-white stroke-slate-50 p-4">
+      <header className="flex h-30  border-b-1 border-black border-solid justify-center justify-items-center sticky top-0  mt-auto mb-automl-auto mr-auto bg-white stroke-slate-50 p-4">
          
         <div className="text-center justify-center w-screen ">
-          <h1 className="text-4xl mt-10 text-center font-light">NEWS WEB</h1>
-          <p className=" absolute l-0 top-5 text-xl mt-10">October 11, 2024</p>
+          <h1 className="text-2xl mt- text-center font-light">NEWS WEB</h1>
+          <p className=" absolute l-0 top-0 text-xl mt-5">October 11, 2024</p>
          
         </div>
         <div className=" sm:hi absolute  right-0  ">
