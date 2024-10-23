@@ -1,3 +1,6 @@
+import Link from "next/link";
+
+
 export default function Sidebar({ newsItems }) {
   if (!newsItems || newsItems.length === 0) {
     return <p className="text-center text-gray-500">No news available.</p>;
@@ -5,7 +8,9 @@ export default function Sidebar({ newsItems }) {
 
   return (
     <div className="space-y-4">
+       
       {newsItems.slice(0, 5).map((item, index) => (
+        <Link key={index} href={`/newsdetail/${item._id}`} passHref>
         
         <div key={index} className="mt-10 ">
           <h3 className="text-md   mt-10  font-semibold hover:text-blue-500">
@@ -34,7 +39,9 @@ export default function Sidebar({ newsItems }) {
           </div>
           </div>
         </div>
+        </Link>
       ))}
+       
     </div>
   );
 }

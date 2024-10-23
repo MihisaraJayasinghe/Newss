@@ -92,6 +92,48 @@ export async function POST(req) {
   }
 }
 
+
+ 
+ 
+export default async function handler(req, res) {
+  const { id } = req.query;
+
+  await dbConnect();
+
+  if (req.method === 'PUT') {
+    try {
+      const updatedNews = await News.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!updatedNews) {
+        return res.status(404).json({ success: false, message: 'News not found' });
+      }
+
+      res.status(200).json({ success: true, data: updatedNews });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  } else if (req.method === 'DELETE') {
+    try {
+      const deletedNews = await News.findByIdAndDelete(id);
+      if (!deletedNews) {
+        return res.status(404).json({ success: false, message: 'News not found' });
+      }
+      res.status(200).json({ success: true, data: deletedNews });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  } else {
+    res.setHeader('Allow', ['PUT', 'DELETE']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+}
+
+
+
+
 // Handle PATCH request to pin/unpin a news article
 export async function PATCH(req) {
   await dbConnect();

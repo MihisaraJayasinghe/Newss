@@ -112,21 +112,23 @@ export default function NewsPage() {
       {/* Page Layout with 3 sections: Sidebar, NewsSection, and RightComponent */}
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar - Left */}
-        <div className="w-full lg:w-1/5 p-4 bg-gray-200 m-5 rounded-lg">
-          <a className="text-2xl font-bold">Unusum Puwath</a>
+        <div id = 'unusum-puwath'className="w-full lg:w-1/5 p-4 bg-gray-200 m-5 rounded-lg">
+          <a className="text-2xl font-bold">උනුසුම් පුවත් </a>
           <Sidebar newsItems={sidebarNewsItems} 
           
            onNewsClick={handleNewsClick} />
         </div>
 
         {/* Main News Section and News Grid - Center */}
-        <div className="flex-1   bg-gray-200 p-4">
+        <div className="flex-1   bg-gray-200 p-4 mt-5">
           {/* Pinned News Section */}
          
           {pinnedNewsItem && (
-            <div className="mb-6 p-6 bg-white border-4 border-blue-500 rounded-lg shadow-md">
+            <div className="mb-6 p-6 bg-white border-4  border-blue-500 rounded-lg shadow-md">
+              <div id="pradana-puwath" >
+                
                <Link   href={`/newsdetail/${pinnedNewsItem._id}`} passHref> 
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Main News</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">ප්‍රධාන පුවත්</h2>
               <h2 className="text-3xl font-bold mb-4">{pinnedNewsItem.title}</h2>
               <div className="flex flex-col md:flex-row gap-4">
                 {pinnedNewsItem.videoUrl && pinnedNewsItem.mediaPreference === 'video' ? (
@@ -152,27 +154,32 @@ export default function NewsPage() {
                   <p className="text-gray-600">{pinnedNewsItem.content.substring(0, 200)}...</p>
  
                 </div>
-           
+          
               </div>
               </Link>
                
+              </div>
             </div>
           
           )}
      
  
           {/* News Grid Section for "Pradana Puwath" */}
-          <div className="border-2 border-black p-6 bg-white rounded-md shadow-md">
-            <h2 className="text-2xl font-bold mb-4">Pradana Puwath</h2>
-            <NewsSection newsItems={nonPinnedPradanaPuwathNews}
-              
+          <div  id="pradana-puwath"  className="border-2 -scroll-mb-96 ;  border-black p-6 bg-white rounded-md shadow-md">
+            <h2 className="text-2xl font-bold mb-4">ප්‍රධාන පුවත්</h2>
+            
+            <NewsSection className='h-60 overflow-scroll' newsItems={nonPinnedPradanaPuwathNews}
+             
              onClick={handleNewsClick}  />
+            
           </div>
 
           {/* News Grid Section for "Wigasa Puwath" */}
-          <div className="border-2 border-black p-6 bg-white rounded-md shadow-md mt-6">
-            <h2 className="text-2xl font-bold mb-4">Wigasa Puwath</h2>
-            <NewsSection newsItems={recentNewsItems} />
+          <div  id="wigasa-puwath" className="border-2  scroll-m-40 border-black p-6 bg-white rounded-md shadow-md mt-6">
+            <h2 className="text-2xl    font-bold mb-4">විගස පුවත්</h2>
+            
+            <NewsSection   newsItems={recentNewsItems} />
+          
           </div>
 
           {/* Add News Form */}
@@ -263,11 +270,12 @@ export default function NewsPage() {
         </div>
 
         {/* Right Sidebar */}
-        <div className=" w-1/5 bg-gray-100 p-4">
+        <div className=" w-1/5  bg-gray-100 p-4 ml-5 rounded-md h-96*2 overflow-auto mt-5">
         <h3 className="font-bold text-lg mb-4">Other News</h3>
 
 {nonsPinnedPradanaPuwathNewss.length > 0 ? (
   nonsPinnedPradanaPuwathNewss.map((item, index) => (
+    <Link key={index} href={`/newsdetail/${item._id}`} passHref> 
     <div key={index} className="mb-4">
       <h4 className="font-semibold text-sm mb-2">{item.title}</h4>
       <p className="text-gray-600">
@@ -290,6 +298,7 @@ export default function NewsPage() {
         Read more
       </a>
     </div>
+    </Link>
   ))
 ) : (
   <p className="text-gray-600">No other news available</p>

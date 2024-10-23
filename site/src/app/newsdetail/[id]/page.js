@@ -1,8 +1,9 @@
 'use client';
-
+ 
 import { useState, useEffect } from 'react';
 import Header from '../../../../components/header'; // Adjust the path as needed
 import Navbar from '../../../../components/navbar'; // Adjust the path as needed
+import Link from 'next/link';
 
 export default function NewsDetail({ params }) {
   const [newsItem, setNewsItem] = useState(null);
@@ -86,6 +87,7 @@ export default function NewsDetail({ params }) {
           <h3 className="font-bold text-lg mb-4">Other News</h3>
           {sidebarNewsItems.length > 0 ? (
             sidebarNewsItems.map((item, index) => (
+              <Link key={index} href={`/newsdetail/${item._id}`} passHref> 
               <div key={index} className="mb-4">
                 <h4 className="font-semibold text-sm mb-2">{item.title}</h4>
                 <p className="text-gray-600">
@@ -102,6 +104,7 @@ export default function NewsDetail({ params }) {
                   Read more
                 </a>
               </div>
+              </Link>
             ))
           ) : (
             <p className="text-gray-600">No other news available</p>

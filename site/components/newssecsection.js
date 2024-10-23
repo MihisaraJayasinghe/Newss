@@ -6,7 +6,7 @@ export default function NewsSection({ newsItems, onPin }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1   sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {newsItems.map((item, index) => (
         <Link key={index} href={`/newsdetail/${item._id}`} passHref>
           <div className="bg-white p-6 rounded-lg shadow-md cursor-pointer">
@@ -17,8 +17,8 @@ export default function NewsSection({ newsItems, onPin }) {
                 className="w-full h-40 object-cover rounded-md"
               />
             )}
-            <h3 className="text-xl font-bold mt-4">{item.title}</h3>
-            <p className="text-gray-600 mt-2">{item.content.substring(0, 150)}...</p>
+            <h3 className="text-md font-bold mt-4">{item.title}</h3>
+            <p className="text-gray-600 mt-2">{item.content.substring(0, 50)}...</p>
             <p className="text-blue-500 mt-2 text-sm">{item.timestamp || 'Just now'}</p>
           </div>
         </Link>

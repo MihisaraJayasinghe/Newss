@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* styles/globals.css (or any global CSS file) */
+html {
+  scroll-behavior: smooth;
+}
+
+
 :root {
   
 }
@@ -10,6 +16,10 @@
   :root {
  
   }
+}
+
+.section {
+  scroll-margin-top: 200px; /* Adjust this value based on your header height */
 }
 
 body {
