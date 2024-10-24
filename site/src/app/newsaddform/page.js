@@ -1,9 +1,13 @@
-'use client'
+'use client';
+
 import { useState, useEffect } from 'react';
 import Header from '../../../components/header';
 import Navbar from '../../../components/navbar';
 
 export default function NewsAddForm() {
+  const [isAdmin, setIsAdmin] = useState(false); // Track if the user is an admin
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [newsItems, setNewsItems] = useState([]); // Store fetched news items
   const [formData, setFormData] = useState({
     title: '',
@@ -19,6 +23,17 @@ export default function NewsAddForm() {
   const [selectedCategory, setSelectedCategory] = useState(''); // For filtering by category
   const [selectedTag, setSelectedTag] = useState(''); // For filtering by tag
 
+  // Handle login
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Hard-coded credentials
+    if (username === 'admin' && password === '1234') {
+      setIsAdmin(true); // Allow access if credentials are correct
+    } else {
+      alert('Invalid credentials!'); // Show alert for invalid login
+    }
+  };
+
   // Fetch news from API
   const fetchNews = async () => {
     try {
@@ -31,8 +46,10 @@ export default function NewsAddForm() {
   };
 
   useEffect(() => {
-    fetchNews();
-  }, []);
+    if (isAdmin) {
+      fetchNews(); // Fetch news only if admin is authenticated
+    }
+  }, [isAdmin]);
 
   // Handle form submission for adding news
   const handleAddSubmit = async (e) => {
@@ -70,12 +87,12 @@ export default function NewsAddForm() {
   // Handle form submission for updating news
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!editingId) {
       alert('No news selected for editing!');
       return;
     }
-  
+
     try {
       const response = await fetch(`/api/addnewsform?id=${editingId}`, {
         method: 'PUT',
@@ -92,7 +109,7 @@ export default function NewsAddForm() {
           tag: formData.tag.split(',').map(tag => tag.trim()), // Ensure tags are saved as an array
         }),
       });
-  
+
       if (response.ok) {
         setFormData({
           title: '',
@@ -149,7 +166,6 @@ export default function NewsAddForm() {
 
   // Filter news items by category or tag
   const filteredNewsItems = newsItems.filter(news => {
-    // Filter based on selected category and tags
     const tagMatch = selectedTag
       ? news.tag.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase())) // Check if any tag matches the search
       : true;
@@ -159,11 +175,47 @@ export default function NewsAddForm() {
     );
   });
 
+  if (!isAdmin) {
+    return (
+      <div className="max-w-md mx-auto p-6">
+        <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-gray-700">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          >
+            Login
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold">NEWS WEB</h1>
-      <Header/>
-      <Navbar/>
+      <Header />
+      <Navbar />
 
       {/* Tab Navigation */}
       <div className="flex space-x-4 mt-4">
