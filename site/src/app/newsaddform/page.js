@@ -23,6 +23,12 @@ export default function NewsAddForm() {
   const [selectedCategory, setSelectedCategory] = useState(''); // For filtering by category
   const [selectedTag, setSelectedTag] = useState(''); // For filtering by tag
 
+  // Hard-coded categories and tags
+  const categories = ['Politics', 'wyapara puwath', 
+  'deshiya puwath',  
+  'wideshiya']; // Sinhala names for categories
+  const tags = ['Unusum Puwath', 'Pradana Puwath' ,]; // Example tags
+
   // Handle login
   const handleLogin = (e) => {
     e.preventDefault();
@@ -259,13 +265,20 @@ export default function NewsAddForm() {
           </div>
           <div>
             <label className="block text-gray-700">Category</label>
-            <input
-              type="text"
+            <select
               name="category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full p-2 border border-gray-300 rounded"
-            />
+              required
+            >
+              <option value="">Select Category</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-gray-700">Author</label>
@@ -279,14 +292,19 @@ export default function NewsAddForm() {
           </div>
           <div>
             <label className="block text-gray-700">Tag</label>
-            <input
-              type="text"
+            <select
               name="tag"
               value={formData.tag}
               onChange={(e) => setFormData({ ...formData, tag: e.target.value })}
               className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Comma-separated tags"
-            />
+            >
+              <option value="">Select Tag</option>
+              {tags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-gray-700">Image URL</label>

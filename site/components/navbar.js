@@ -14,7 +14,7 @@ export default function Navbar() {
           <Link href="#wigasa-puwath" className="scroll-smooth">විගස පුවත්</Link>
         </li>
         <li className="hover:text-blue-500 text-red-500">
-          <a href="#videos" className="scroll-smooth">Videos</a>
+          <a href="#videos-puwaths" className="scroll-smooth">Videos</a>
         </li>
       </ul>
     </nav>

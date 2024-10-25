@@ -12,7 +12,17 @@ const NewsSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Please provide a category for the news article'],
-    enum: ['Politics', 'Sports', 'Technology', 'Entertainment', 'World', 'Local'], // Example categories, modify as needed
+    enum: [
+      'Politics',
+      'Sports',
+      'Technology',
+      'Entertainment',
+      'World',
+      'Local',
+      'wyapara puwath',  // Sinhala category
+      'deshiya puwath',  // Sinhala category
+      'wideshiya',       // Sinhala category
+    ],
   },
   author: {
     type: String,
@@ -22,9 +32,8 @@ const NewsSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // Automatically set the publication date to the current time
   },
-  
-  stype:{
-    type:String,
+  stype: {
+    type: String,
     default: null, // Default value for non-pinned articles
   },
   tag: {

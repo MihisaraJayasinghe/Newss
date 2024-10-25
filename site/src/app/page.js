@@ -96,7 +96,7 @@ export default function NewsPage() {
   const nonsPinnedPradanaPuwathNewss = newsItems.filter((item) => item.stype !== 'pinned');
 
   const sidebarNewsItems = newsItems.filter((item) => item.tag.includes('Unusum Puwath'));
-  
+  const sidebarNewsItemss = newsItems.filter((item) => item.category.includes('deshiya'));
   // Function to filter news by time (less than 24 hours ago)
   const recentNewsItems = newsItems.filter((item) => {
     const oneDayAgo = dayjs().subtract(1, 'day');
@@ -104,7 +104,7 @@ export default function NewsPage() {
   });
 
   return (
-    <div>
+    <div >
       {/* Header and Navbar */}
       <Header />
       <Navbar />
@@ -112,12 +112,24 @@ export default function NewsPage() {
       {/* Page Layout with 3 sections: Sidebar, NewsSection, and RightComponent */}
       <div className="flex flex-col lg:flex-row">
         {/* Sidebar - Left */}
-        <div id = 'unusum-puwath'className="w-full lg:w-1/5 p-4 bg-gray-200 m-5 rounded-lg">
+        <div className='w-full lg:w-1/5'>
+        <div id = 'unusum-puwath'className=" p-4 bg-gray-200 h-[1] m-5 rounded-lg">
+
           <a className="text-2xl font-bold">උනුසුම් පුවත් </a>
           <Sidebar newsItems={sidebarNewsItems} 
           
            onNewsClick={handleNewsClick} />
+           
         </div>
+     
+        <div id = 'unusum-puwath'className="  p-4 bg-gray-200 h-[1] m-5 rounded-lg">
+          <a className="text-2xl font-bold">deshiya පුවත් </a>
+          <Sidebar newsItems={sidebarNewsItemss} 
+          
+           onNewsClick={handleNewsClick} />
+           
+        </div>
+</div>
 
         {/* Main News Section and News Grid - Center */}
         <div className="flex-1   bg-gray-200 p-4 mt-5">
@@ -181,96 +193,30 @@ export default function NewsPage() {
             <NewsSection   newsItems={recentNewsItems} />
           
           </div>
+          <div  id="videos-puwaths" className="border-2  scroll-m-40 border-black p-6 bg-white rounded-md shadow-md mt-6">
+            <h2 className="text-2xl    font-bold mb-4">videos පුවත්</h2>
+            
+            <ul>
+              {newsItems.map((news) => (
+                news.videoUrl && (
+                  <li key={news._id} className=" flex inline-flex mb-4 p-5">
+                    <div className="w-full md:w-1/2"> 
+                    <ReactPlayer url={news.videoUrl} controls width="100%" height="auto"   />
+                   </div>
+                    <h4 className="font-semibold p-5  ">{news.title}</h4>
+                  </li>
+                )
+              ))}
+            </ul>
+          </div>
 
           {/* Add News Form */}
-          <div className="p-6 mt-6 bg-white rounded-lg shadow-md border">
-            <h2 className="text-2xl font-bold mb-4">Add News</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-gray-700">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Content</label>
-                <textarea
-                  name="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Tag</label>
-                <input
-                  type="text"
-                  name="tag"
-                  value={formData.tag}
-                  onChange={(e) => setFormData({ ...formData, tag: e.target.value.split(',') })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Acuthor</label>
-                <input
-                  type="text"
-                  name="acuthor"
-                  value={formData.ca}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Author</label>
-                <input
-                  type="text"
-                  name="author"
-                  value={formData.author}
-                  onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Image URL</label>
-                <input
-                  type="text"
-                  name="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Video URL</label>
-                <input
-                  type="text"
-                  name="videoUrl"
-                  value={formData.videoUrl}
-                  onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-              >
-                Add News
-              </button>
-            </form>
-          </div>
+           
         </div>
 
         {/* Right Sidebar */}
-        <div className=" w-1/5  bg-gray-100 p-4 ml-5 rounded-md h-96*2 overflow-auto mt-5">
+        <div className='w-1/5' >
+          <div className="   bg-gray-100 p-4 h-[1500px] ml-5  over mb-5 rounded-md    overflow-auto mt-5"> 
         <h3 className="font-bold text-lg mb-4">Other News</h3>
 
 {nonsPinnedPradanaPuwathNewss.length > 0 ? (
@@ -303,7 +249,45 @@ export default function NewsPage() {
 ) : (
   <p className="text-gray-600">No other news available</p>
 )}
+
 </div>
+<div className="   bg-gray-100 p-4 h-[1500px] ml-5   mb-5 rounded-md    overflow-auto mt-5"> 
+<div> 
+  <h1>wideshiya news</h1>
+{nonsPinnedPradanaPuwathNewss.length > 0 ? (
+  nonsPinnedPradanaPuwathNewss.map((item, index) => (
+    <Link key={index} href={`/newsdetail/${item._id}`} passHref> 
+    <div key={index} className="mb-4">
+      <h4 className="font-semibold text-sm mb-2">{item.title}</h4>
+      <p className="text-gray-600">
+        {item.content.substring(0, 100)}... {/* Limit the content preview */}
+      </p>
+
+
+      {item.imageUrl && (
+          <img
+            src={item.imageUrl}
+            alt={item.title}
+            className="w-full h-24 object-cover rounded-md mb-2"
+          />
+      )}
+
+
+
+     
+      <a href={item.link || '#'} className="text-blue-500 text-sm">
+        Read more
+      </a>
+    </div>
+    </Link>
+  ))
+) : (
+  <p className="text-gray-600">No other news available</p>
+)}
+</div>
+</div>
+</div>
+ 
       </div>
     </div>
   );
