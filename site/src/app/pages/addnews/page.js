@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Header from '../../../components/header';
-import Navbar from '../../../components/navbar';
-import Sidebar from '../../../components/sidesbars';
-import NewsSection from '../../../components/newssecsection';
+import Header from '../../../../components/header';
+import Navbar from '../../../../components/navbar';
+import Sidebar from '../../../../components/sidesbars';
+import NewsSection from '../../../../components/newssecsection';
 import ReactPlayer from 'react-player';
 
 export default function NewsPage() {
