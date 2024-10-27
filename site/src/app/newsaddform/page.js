@@ -5,38 +5,36 @@ import Header from '../../../components/header';
 import Navbar from '../../../components/navbar';
 
 export default function NewsAddForm() {
-  const [isAdmin, setIsAdmin] = useState(false); // Track if the user is an admin
+  const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [newsItems, setNewsItems] = useState([]); // Store fetched news items
+  const [newsItems, setNewsItems] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     category: '',
     author: '',
+    stype: '', // Field to specify if the news is pinned
     imageUrl: '',
     tag: '',
     videoUrl: '',
   });
-  const [editingId, setEditingId] = useState(null); // ID of the news being edited
-  const [activeTab, setActiveTab] = useState('all'); // Control the active tab
-  const [selectedCategory, setSelectedCategory] = useState(''); // For filtering by category
-  const [selectedTag, setSelectedTag] = useState(''); // For filtering by tag
+  const [editingId, setEditingId] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedTag, setSelectedTag] = useState('');
 
-  // Hard-coded categories and tags
-  const categories = ['Politics', 'wyapara puwath', 
-  'deshiya puwath',  
-  'wideshiya']; // Sinhala names for categories
-  const tags = ['Unusum Puwath', 'Pradana Puwath' ,]; // Example tags
+  // Categories and tags
+  const categories = ['Politics', 'wyapara puwath', 'deshiya puwath', 'wideshiya'];
+  const tags = ['Unusum Puwath', 'Pradana Puwath'];
 
-  // Handle login
+  // Handle admin login
   const handleLogin = (e) => {
     e.preventDefault();
-    // Hard-coded credentials
     if (username === 'admin' && password === '1234') {
-      setIsAdmin(true); // Allow access if credentials are correct
+      setIsAdmin(true);
     } else {
-      alert('Invalid credentials!'); // Show alert for invalid login
+      alert('Invalid credentials!');
     }
   };
 
@@ -53,13 +51,18 @@ export default function NewsAddForm() {
 
   useEffect(() => {
     if (isAdmin) {
-      fetchNews(); // Fetch news only if admin is authenticated
+      fetchNews();
     }
   }, [isAdmin]);
 
-  // Handle form submission for adding news
+  // Handle adding news
   const handleAddSubmit = async (e) => {
     e.preventDefault();
+
+    // Unpin any previously pinned news if this item is set to be pinned
+    if (formData.stype === 'pin') {
+      await unpinPreviousNews();
+    }
 
     try {
       const response = await fetch('/api/news', {
@@ -76,12 +79,13 @@ export default function NewsAddForm() {
           content: '',
           category: '',
           author: '',
+          stype: '',
           imageUrl: '',
           tag: '',
           videoUrl: '',
         });
         alert('News added successfully!');
-        fetchNews(); // Refresh the news list
+        fetchNews();
       } else {
         console.error('Error submitting news:', response.statusText);
       }
@@ -90,13 +94,18 @@ export default function NewsAddForm() {
     }
   };
 
-  // Handle form submission for updating news
+  // Handle updating news
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
     if (!editingId) {
       alert('No news selected for editing!');
       return;
+    }
+
+    // Unpin any previously pinned news if this item is set to be pinned
+    if (formData.stype === 'pin') {
+      await unpinPreviousNews();
     }
 
     try {
@@ -106,12 +115,7 @@ export default function NewsAddForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: formData.title,
-          content: formData.content,
-          category: formData.category,
-          author: formData.author,
-          imageUrl: formData.imageUrl,
-          videoUrl: formData.videoUrl,
+          ...formData,
           tag: formData.tag.split(',').map(tag => tag.trim()), // Ensure tags are saved as an array
         }),
       });
@@ -122,14 +126,15 @@ export default function NewsAddForm() {
           content: '',
           category: '',
           author: '',
+          stype: '',
           imageUrl: '',
           tag: '',
           videoUrl: '',
         });
         alert('News updated successfully!');
-        setEditingId(null); // Reset the editing state
-        setActiveTab('all'); // Switch back to "View News" tab after update
-        fetchNews(); // Refresh the news list
+        setEditingId(null);
+        setActiveTab('all');
+        fetchNews();
       } else {
         console.error('Error updating news:', response.statusText);
       }
@@ -138,19 +143,38 @@ export default function NewsAddForm() {
     }
   };
 
-  // Handle selecting a news item to edit
+  // Function to unpin previously pinned news
+  const unpinPreviousNews = async () => {
+    try {
+      const response = await fetch('/api/news?stype=pin', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ stype: '' }), // Unpin previous news
+      });
+      if (!response.ok) {
+        console.error('Error unpinning previous news:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error unpinning previous news:', error);
+    }
+  };
+
+  // Function to edit a selected news item
   const handleEdit = (news) => {
-    setEditingId(news._id); // Set the ID of the news being edited
+    setEditingId(news._id);
     setFormData({
       title: news.title,
       content: news.content,
       category: news.category,
       author: news.author,
       imageUrl: news.imageUrl,
-      tag: news.tag.join(', '), // Convert the tag array back to a comma-separated string for the input
+      stype: news.stype,
+      tag: news.tag.join(', '),
       videoUrl: news.videoUrl,
     });
-    setActiveTab('add'); // Switch to "Add/Edit News" tab
+    setActiveTab('add');
   };
 
   // Handle tab switching
@@ -163,6 +187,7 @@ export default function NewsAddForm() {
         content: '',
         category: '',
         author: '',
+        stype: '',
         imageUrl: '',
         tag: '',
         videoUrl: '',
@@ -172,13 +197,8 @@ export default function NewsAddForm() {
 
   // Filter news items by category or tag
   const filteredNewsItems = newsItems.filter(news => {
-    const tagMatch = selectedTag
-      ? news.tag.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase())) // Check if any tag matches the search
-      : true;
-
-    return (
-      (!selectedCategory || news.category === selectedCategory) && tagMatch
-    );
+    const tagMatch = selectedTag ? news.tag.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase())) : true;
+    return (!selectedCategory || news.category === selectedCategory) && tagMatch;
   });
 
   if (!isAdmin) {
@@ -239,9 +259,10 @@ export default function NewsAddForm() {
         </button>
       </div>
 
+      {/* Add/Edit News Form */}
       {activeTab === 'add' && (
-        <form className="space-y-4 mt-6">
-          {/* Input fields for form */}
+        <form className="space-y-4 mt-6" onSubmit={editingId ? handleUpdateSubmit : handleAddSubmit}>
+          {/* Input fields for news form */}
           <div>
             <label className="block text-gray-700">Title</label>
             <input
@@ -291,6 +312,17 @@ export default function NewsAddForm() {
             />
           </div>
           <div>
+            <label className="block text-gray-700">Pin Status</label>
+            <input
+              type="text"
+              name="stype"
+              value={formData.stype}
+              onChange={(e) => setFormData({ ...formData, stype: e.target.value })}
+              className="w-full p-2 border border-gray-300 rounded"
+              placeholder="Type 'pin' to pin this news"
+            />
+          </div>
+          <div>
             <label className="block text-gray-700">Tag</label>
             <select
               name="tag"
@@ -329,27 +361,19 @@ export default function NewsAddForm() {
 
           <div className="flex space-x-4">
             <button
-              onClick={handleAddSubmit}
+              type="submit"
               className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-              type="submit"
             >
-              Add News
-            </button>
-
-            <button
-              onClick={handleUpdateSubmit}
-              className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-              type="submit"
-            >
-              Update News
+              {editingId ? 'Update News' : 'Add News'}
             </button>
           </div>
         </form>
       )}
 
+      {/* View News Tab */}
       {activeTab === 'all' && (
         <div className="mt-6">
-          {/* Filters for category and tag */}
+          {/* Category and Tag Filters */}
           <div className="flex space-x-4 mb-4">
             <select
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -373,7 +397,7 @@ export default function NewsAddForm() {
             />
           </div>
 
-          {/* Display filtered news items */}
+          {/* Display News List */}
           {filteredNewsItems.length === 0 ? (
             <p>No news available.</p>
           ) : (
