@@ -36,6 +36,11 @@ const NewsSchema = new mongoose.Schema({
     type: String,
     default: null, // Default value for non-pinned articles
   },
+
+  live:{
+    type:String,
+    default:null,
+  },
   tag: {
     type: [String], // An array of strings to store tags
     default: [], // Default to an empty array
