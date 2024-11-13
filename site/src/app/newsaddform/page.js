@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../../components/header';
 import Navbar from '../../../components/navbar';
-
+import Link from 'next/link';
 export default function NewsAddForm() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState('');
@@ -242,6 +242,14 @@ export default function NewsAddForm() {
      
       <Header />
       <Navbar />
+      <Link href='/addnews' passHref> 
+      <button
+         add news status
+          className={`px-4 py-2 bg-blue-500  `}>
+       
+          add news status
+        </button>
+        </Link>
 
       {/* Tab Navigation */}
       <div className="flex space-x-4 mt-4">

@@ -9,22 +9,22 @@ export default function Header() {
   });
 
   return (
-    <header className="relative flex items-center justify-between h-20 border-b border-black sticky top-0 bg-white p-4 shadow-md">
+    <header className="relative flex items-center justify-between h-16 md:h-20 border-b border-black sticky top-0 bg-white p-4 shadow-md">
       
       {/* Left Section: Date */}
       <div className="flex items-center">
-        <p className="text-xl text-gray-600">{currentDate}</p>
+        <p className="text-sm md:text-xl text-gray-600">{currentDate}</p>
       </div>
 
       {/* Center Section: Title */}
       <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
         <a href="/" className="block">
-          <h1 className="text-2xl font-light">NEWS WEB</h1>
+          <h1 className="text-lg md:text-2xl font-light">NEWS WEB</h1>
         </a>
       </div>
 
       {/* Right Section: Action Buttons */}
-      <div className="flex space-x-4">
+      <div className="flex space-x-2 md:space-x-4">
         {/* Example Button 1 */}
         <button
           className="text-gray-700 hover:text-gray-900"
@@ -35,7 +35,7 @@ export default function Header() {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            className="w-6 h-6"
+            className="w-5 h-5 md:w-6 md:h-6"
           >
             <path
               strokeLinecap="round"
@@ -55,7 +55,7 @@ export default function Header() {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            className="w-6 h-6"
+            className="w-5 h-5 md:w-6 md:h-6"
           >
             <path
               strokeLinecap="round"

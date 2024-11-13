@@ -20,15 +20,23 @@ function NewsCard({ item }) {
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
+  // Format the published date
+  const formattedDate = item.publishedAt
+    ? new Date(item.publishedAt).toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Date not available";
+
   return (
     <div
-      className={`  bg-white p-6 rounded-lg shadow-md cursor-pointer flex flex-col transition-all duration-300 ${
+      className={`bg-white p-6 rounded-lg shadow-md cursor-pointer flex flex-col transition-all duration-300 ${
         isExpanded ? "h-auto" : "h-96 overflow-hidden"
       }`}
     >
-      {/* Conditionally render the LIVE badge */}
-      
-
       <Link href={`/newsdetail/${item._id}`} passHref>
         <div>
           {item.imageUrl && (
@@ -38,7 +46,7 @@ function NewsCard({ item }) {
               className="w-full h-48 object-cover rounded-md"
             />
           )}
-          
+
           <div className="flex flex-col flex-grow mt-4">
             <h3 className="text-sm font-bold">{item.title}</h3>
             <p
@@ -52,7 +60,8 @@ function NewsCard({ item }) {
         </div>
       </Link>
       <div className="mt-auto">
-        <p className="text-blue-500 mt-2 text-sm">{item.timestamp || "Just now"}</p>
+        {/* Display the formatted published date */}
+        <p className="text-gray-500 mt-2 text-sm">Published on: {formattedDate}</p>
         <button
           onClick={(e) => {
             e.preventDefault(); // Prevents Link navigation on button click

@@ -1,82 +1,77 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import Header from '../../../components/header';
 import Navbar from '../../../components/navbar';
 import ReactPlayer from 'react-player';
 
 export default function NewsPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [newsItems, setNewsItems] = useState([]);
   const [pinnedNewsItem, setPinnedNewsItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    category: '',
-    author: '',
-    imageUrl: '',
-    videoUrl: '',
-  });
 
   useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const response = await fetch('/api/news');
-        if (response.ok) {
-          const data = await response.json();
-          setNewsItems(data.data || []);
+    if (isAuthenticated) {
+      const fetchNews = async () => {
+        try {
+          const response = await fetch('/api/news');
+          if (response.ok) {
+            const data = await response.json();
+            setNewsItems(data.data || []);
+          }
+        } catch (error) {
+          console.error('Error fetching news:', error);
         }
-      } catch (error) {
-        console.error('Error fetching news:', error);
-      }
-    };
-    fetchNews();
-  }, []);
+      };
+      fetchNews();
+    }
+  }, [isAuthenticated]);
 
-  const toggleLiveStatus = async (itemId, isCurrentlyLive) => {
-    const updatedStatus = isCurrentlyLive ? null : 'live';
-
-    try {
-      const response = await fetch('/api/status/', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: itemId, live: updatedStatus }),
-      });
-
-      if (response.ok) {
-        setNewsItems((prevItems) =>
-          prevItems.map((item) =>
-            item._id === itemId ? { ...item, live: updatedStatus } : item
-          )
-        );
-      } else {
-        console.error('Error updating live status:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error updating live status:', error);
+  const handleLogin = () => {
+    if (loginUsername === 'admin' && loginPassword === '1234') {
+      setIsAuthenticated(true);
+    } else {
+      alert('Incorrect username or password');
     }
   };
 
-  const handlePin = (item) => {
-    setPinnedNewsItem(item);
-    setNewsItems((prevItems) =>
-      prevItems.map((news) =>
-        news._id === item._id ? { ...news, stype: 'pinned' } : { ...news, stype: '' }
-      )
+  // Filter news items based on search term
+  const filteredNewsItems = newsItems.filter(item =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-  justify-center h-screen ">
+        <div className="w-full max-w-sm  -white p-8 rounded-lg  ">
+          <h2 className="text-center text-3xl font-semibold text-gray-800 mb-6">Admin Login</h2>
+          <input
+            type="text"
+            placeholder="Username"
+            value={loginUsername}
+            onChange={(e) => setLoginUsername(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded mb-4 text-gray-800 focus:outline-none focus:ring focus:ring-blue-300"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded mb-4 text-gray-800 focus:outline-none focus:ring focus:ring-blue-300"
+          />
+          <button
+            onClick={handleLogin}
+            className="w-full bg-blue-600 text-white p-3 rounded font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Login
+          </button>
+        </div>
+      </div>
     );
-  };
-
-  const handleUnpin = () => {
-    if (pinnedNewsItem) {
-      setNewsItems((prevItems) =>
-        prevItems.map((news) =>
-          news._id === pinnedNewsItem._id ? { ...news, stype: '' } : news
-        )
-      );
-      setPinnedNewsItem(null);
-    }
-  };
+  }
 
   return (
     <div>
@@ -129,7 +124,7 @@ export default function NewsPage() {
 
       {/* News Card Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full p-6">
-        {newsItems.map((item) => (
+        {filteredNewsItems.map((item) => (
           <div key={item._id} className="bg-white rounded-lg shadow-lg p-4 relative">
             {/* Display "Live" badge if the item is live */}
             {item.live === 'live' && (
@@ -138,8 +133,6 @@ export default function NewsPage() {
               </span>
             )}
             <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-
-            {/* Display video or image */}
             {item.videoUrl ? (
               <ReactPlayer
                 url={item.videoUrl}
@@ -161,8 +154,6 @@ export default function NewsPage() {
             <p>{item.content.substring(0, 100)}...</p>
             <p><strong>Author:</strong> {item.author}</p>
             <p><strong>Category:</strong> {item.category}</p>
-
-            {/* Pin button for each news item */}
             <button
               onClick={() => handlePin(item)}
               className={`mt-2 px-4 py-2 rounded ${
@@ -171,8 +162,6 @@ export default function NewsPage() {
             >
               {item.stype === 'pinned' ? 'Pinned' : 'Pin'}
             </button>
-
-            {/* Live Toggle Button */}
             <button
               onClick={() => toggleLiveStatus(item._id, item.live === 'live')}
               className={`mt-2 px-4 py-2 rounded ${

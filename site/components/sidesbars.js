@@ -6,59 +6,51 @@ export default function Sidebar({ newsItems }) {
     return <p className="text-center text-gray-500">No news available.</p>;
   }
 
+  const now = dayjs();
+
   const getTimeDisplay = (timestamp) => {
     const publishedTime = dayjs(timestamp);
-    const now = dayjs();
-
     if (!publishedTime.isValid()) {
       console.warn("Invalid date:", timestamp);
       return "Unknown time";
     }
 
     const diffInMinutes = now.diff(publishedTime, "minute");
-
-    if (diffInMinutes < 1) {
-      return "Just now";
-    } else if (diffInMinutes < 60) {
-      return `${diffInMinutes} minutes ago`;
-    } else if (diffInMinutes < 24 * 60) {
-      const diffInHours = now.diff(publishedTime, "hour");
-      return `${diffInHours} hours ago`;
-    } else {
-      return publishedTime.format("MMM D, YYYY h:mm A"); // Display formatted date for older news
-    }
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInMinutes < 1440) return `${now.diff(publishedTime, "hour")} hours ago`;
+    return publishedTime.format("MMM D, YYYY h:mm A");
   };
 
   return (
     <div className="space-y-4">
-      {newsItems.slice(0, 5).map((item, index) => (
-        <Link key={index} href={`/newsdetail/${item._id}`} passHref>
-          {item.live === 'live' && (
-              <span className="  bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+      {newsItems.slice(0, 5).map((item) => (
+        <Link key={item._id} href={`/newsdetail/${item._id}`} passHref>
+          <div className="mt-10 cursor-pointer">
+            {/* LIVE Badge */}
+            {item.live === "live" && (
+              <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                 LIVE
               </span>
             )}
-          <div className="mt-10">
-            <h3 className="text-sm font-semibold hover:text-blue-500">
-              <a href={item.link || '#'}>{item.title}</a>
-              
+            <h3 className="text-sm font-semibold hover:text-blue-500 mt-2">
+              <a href={item.link || "#"}>{item.title}</a>
             </h3>
-            <div className="flex">
+            <div className="flex mt-2">
               {/* News Image */}
               {item.imageUrl && (
                 <img
                   src={item.imageUrl}
                   alt={item.title}
-                  className="w-32 h-24 mt-2 object-cover rounded-md"
+                  className="w-32 h-24 object-cover rounded-md"
                 />
               )}
-
               {/* News Content */}
-              <div className="flex-1 ml-5 mr-5">
-                <p className="text-gray-600 text-justify text-xs mt-2">
-                  {item.content.substring(0, 50)}... {/* Trim content for preview */}
+              <div className="flex-1 ml-5">
+                <p className="text-gray-600 text-xs">
+                  {item.content.substring(0, 50)}...
                 </p>
-                <p className="text-blue-500 mt-2 text-xs">
+                <p className="text-blue-500 text-xs mt-2">
                   {getTimeDisplay(item.publishedAt)}
                 </p>
               </div>
