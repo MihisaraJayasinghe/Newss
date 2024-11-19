@@ -9,11 +9,8 @@ import ReactPlayer from 'react-player';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 
-
-
-
 // Reusable component for main news sections with "See More" functionality
-const NewsSectionWithToggle = ({ title, newsItems, limit = 6   }) => {
+const NewsSectionWithToggle = ({ title, newsItems, limit = 6 }) => {
   const [visibleCount, setVisibleCount] = useState(limit);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -28,8 +25,8 @@ const NewsSectionWithToggle = ({ title, newsItems, limit = 6   }) => {
   };
 
   return (
-    <div className="border-2 border-black p-4 lg:p-6 bg-white rounded-md shadow-md max-h-full overflow-auto m-2 lg:m-5">
-      <h2 className="text-base lg:text-sm font-bold mb-2 lg:mb-4">{title}</h2>
+    <div className="border-2 border-black p-4 lg:p-6 bg-white rounded-md shadow-md m-2 lg:m-5">
+      <h2 className="text-base lg:text-xl font-bold mb-2 lg:mb-4">{title}</h2>
       <NewsSection newsItems={newsItems.slice(0, visibleCount)} />
       {newsItems.length > limit && (
         <button
@@ -46,8 +43,7 @@ const NewsSectionWithToggle = ({ title, newsItems, limit = 6   }) => {
 export default function NewsPage() {
   const [newsItems, setNewsItems] = useState([]);
   const [pinnedNewsItem, setPinnedNewsItem] = useState(null);
-  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [visibleRightSidebarCount, setVisibleRightSidebarCount] = useState(9);
   const [isRightSidebarExpanded, setIsRightSidebarExpanded] = useState(false);
 
@@ -80,8 +76,7 @@ export default function NewsPage() {
     fetchPinnedNews();
   }, []);
 
-  const toggleLeftSidebar = () => setIsLeftSidebarOpen(!isLeftSidebarOpen);
-  const toggleRightSidebar = () => setIsRightSidebarOpen(!isRightSidebarOpen);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const nonPinnedPradanaPuwathNews = newsItems.filter(
     (item) => item.tag.includes('Pradana Puwath') && item.stype !== 'pinned'
@@ -114,48 +109,115 @@ export default function NewsPage() {
       <Header />
       <Navbar />
 
-      {/* Mobile Hamburger Menus */}
-      <div className="lg:hidden flex justify-between p-4 bg-gray-200">
-        <button onClick={toggleLeftSidebar} className="text-base font-bold">
-          ☰ Unusum & Deshiya Puwath
-        </button>
-        <button onClick={toggleRightSidebar} className="text-base font-bold">
-          ☰ Other News
-        </button>
-      </div>
-
-      <div className="flex flex-col lg:flex-row flex-grow mt-5">
-        {/* Left Sidebar */}
-        <div
-          className={`lg:w-1/5 ${
-            isLeftSidebarOpen ? 'block' : 'hidden lg:block'
-          } flex flex-col h-full ml-2 mr-2 mt-2 lg:ml-5 lg:mr-5 rounded-lg lg:mt-5`}
+      {/* Mobile Hamburger Menu */}
+      <header className="fixed top-0 left-0 w-full bg-gray-800 text-white flex justify-between items-center p-4 z-50 lg:hidden">
+        <h1 className="text-lg font-bold">News Portal</h1>
+        <button
+          onClick={toggleSidebar}
+          className="text-2xl focus:outline-none"
+          aria-label="Toggle Menu"
         >
-          {/* Unusum Puwath Section */}
-          <div id='unusum-puwath' className="p-4  bg-gray-100   flex-1 mb-4 rounded-lg overflow-auto max-h-[2000px]">
-            <h2  className="text-sm lg:text-lg p0 underline font-bold mb-2 lg:mb-4">
+          ☰
+        </button>
+      </header>
+
+      {/* Sidebar */}
+<div
+  className={`fixed top-0 left-0 h-full bg-gradient-to-b from-gray-800 to-gray-900 text-white transition-transform transform ${
+    isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+  } w-64 z-50 shadow-lg`}
+>
+  <button
+    onClick={toggleSidebar}
+    className="absolute top-4 right-4 text-2xl focus:outline-none hover:text-gray-300"
+    aria-label="Close Menu"
+  >
+    ✕
+  </button>
+  <div className="mt-8 px-4">
+    <h1 className="text-2xl font-bold mb-6">News Portal</h1>
+  </div>
+  <nav className="mt-4 px-4 space-y-6">
+    {/* Categories Section */}
+    <h2 className="text-lg font-semibold mb-2">Categories</h2>
+    <ul className="space-y-4">
+      <li>
+        <a
+          href="#unusum-puwath"
+          className="flex items-center text-base font-medium hover:text-blue-300"
+          onClick={toggleSidebar}
+        >
+          <span className="mr-2">🔥</span>
+          Unusum Puwath
+        </a>
+      </li>
+      <li>
+        <a
+          href="#wigasa-puwath"
+          className="flex items-center text-base font-medium hover:text-blue-300"
+          onClick={toggleSidebar}
+        >
+          <span className="mr-2">📰</span>
+          Wigasa Puwath
+        </a>
+      </li>
+      <li>
+        <a
+          href="#deshiya-puwath"
+          className="flex items-center text-base font-medium hover:text-blue-300"
+          onClick={toggleSidebar}
+        >
+          <span className="mr-2">🌍</span>
+          Deshiya Puwath
+        </a>
+      </li>
+      <li>
+        <a
+          href="#all-news"
+          className="flex items-center text-base font-medium hover:text-blue-300"
+          onClick={toggleSidebar}
+        >
+          <span className="mr-2">📚</span>
+          All News
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          onClick={toggleSidebar}
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        ></div>
+      )}
+
+      {/* Content */}
+      <div className="flex flex-col lg:flex-row flex-grow mt-16 lg:mt-5">
+        {/* Left Sidebar (Desktop Only) */}
+        <div className="hidden lg:block lg:w-1/5 flex flex-col h-full ml-2 mr-2 mt-2 lg:ml-5 lg:mr-5 rounded-lg lg:mt-5">
+          {/* Unusum Puwath Section (Desktop Only) */}
+          <div
+            id="unusum-puwath-sidebar"
+            className="p-4 bg-gray-100 flex-1 mb-4 rounded-lg"
+          >
+            <h2 className="text-sm lg:text-lg underline font-bold mb-2 lg:mb-4">
               උනුසුම් පුවත්
             </h2>
             <Sidebar
               newsItems={newsItems.filter((item) =>
                 item.tag.includes('Unusum Puwath')
-               
               )}
-
-             
             />
-
-          {newsItems.live === 'live' && (
-        <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-          LIVE
-        </span>
-      )}
           </div>
 
           {/* Deshiya Puwath Section */}
-          <div className="p-4 mt-10 bg-gray-100 flex-1 mb-4 rounded-lg overflow-auto max-h-[2000px]">
+          <div
+            id="deshiya-puwath-sidebar"
+            className="p-4 mt-10 bg-gray-100 flex-1 mb-4 rounded-lg"
+          >
             <h2 className="text-sm lg:text-lg font-bold mb-2 lg:mb-4">
-            දෙශිය පුවත්
+              දෙශිය පුවත්
             </h2>
             <Sidebar
               newsItems={newsItems.filter((item) =>
@@ -165,8 +227,11 @@ export default function NewsPage() {
           </div>
 
           {/* Krida Puwath Section */}
-          <div className="p-4 bg-gray-100 flex-1 rounded-lg overflow-auto max-h-[2000px]">
-            <h2 className="text-sm lg:text-xs font-bold mb-2 lg:mb-4">
+          <div
+            id="krida-puwath-sidebar"
+            className="p-4 bg-gray-100 flex-1 rounded-lg"
+          >
+            <h2 className="text-sm lg:text-lg font-bold mb-2 lg:mb-4">
               Krida Puwath
             </h2>
             <Sidebar
@@ -178,37 +243,37 @@ export default function NewsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-gray-50  lg:mt-5 flex flex-col rounded-lg">
+        <div className="flex-1 bg-gray-50 lg:mt-5 flex flex-col rounded-lg">
           {/* Pinned News Section */}
-          
           {pinnedNewsItem && (
-            <div id='pradana-puwath' className="mb-4  scorll-m-40 lg:mb-6 p-4 lg:pl-6 lg:pr-6 bg-white border-4 border-blue-500 rounded-lg shadow-md max-h-[400px] overflow-auto   ml-5 mr-5">
+            <div
+              id="pradana-puwath"
+              className="mb-4 scroll-m-40 lg:mb-6 p-4 lg:pl-6 lg:pr-6 bg-white border-4 border-blue-500 rounded-lg shadow-md ml-5 mr-5"
+            >
               <Link href={`/newsdetail/${pinnedNewsItem._id}`} passHref>
                 <div className="cursor-pointer">
-               
-                  <h2 className="text-xs lg:text-xl font-bold text-gray-800 mb-2 lg:mb-4">
+                  <h2 className="text-base lg:text-xl font-bold text-gray-800 mb-2 lg:mb-4">
                     ප්‍රධාන පුවත්
                   </h2>
                   {pinnedNewsItem.live === 'live' && (
-        <span className="  bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-          LIVE
-        </span>
-      )}
+                    <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                      LIVE
+                    </span>
+                  )}
                   <h2 className="text-sm lg:text-xl font-bold mb-2 lg:mb-4">
                     {pinnedNewsItem.title}
                   </h2>
                   <div className="flex flex-col md:flex-row gap-2 lg:gap-4">
                     {pinnedNewsItem.videoUrl &&
                     pinnedNewsItem.mediaPreference === 'video' ? (
-                      <div className="w-60 rounded-lg overflow-hidden  ">
+                      <div className="w-full md:w-1/2 rounded-lg overflow-hidden">
                         <ReactPlayer
-
                           url={pinnedNewsItem.videoUrl}
                           playing
                           controls
                           width="100%"
                           height="auto"
-                          className="rounded-lg" 
+                          className="rounded-lg"
                         />
                       </div>
                     ) : pinnedNewsItem.imageUrl ? (
@@ -232,36 +297,62 @@ export default function NewsPage() {
           )}
 
           {/* Pradana Puwath Section with "See More" */}
-          <NewsSectionWithToggle
-           className="fixed"
-            title="ප්‍රධාන පුවත්"
-            titleClassName="text-xl"
-            newsItems={nonPinnedPradanaPuwathNews}
-           
-            limit={6}
-            
-          />
-
-          {/* Wigasa Puwath Section with "See More" */}
-          <div id='wigasa-puwath' className=' scroll-m-32 '>
-          { recentWigasaPuwathNews.length > 0 && (
-            < NewsSectionWithToggle
-           
-              title="විගස පුවත්"
-              titleClassName="text-xl"
-          
-              newsItems={recentWigasaPuwathNews}
+          <div id="pradana-puwath">
+            <NewsSectionWithToggle
+              title="ප්‍රධාන පුවත්"
+              newsItems={nonPinnedPradanaPuwathNews}
               limit={6}
             />
-          )}
+          </div>
+
+          {/* Unusum Puwath Section (Mobile Only) */}
+          <div
+            id="unusum-puwath"
+            className="block lg:hidden"
+          >
+            <NewsSectionWithToggle
+              title="උනුසුම් පුවත්"
+              newsItems={newsItems.filter((item) =>
+                item.tag.includes('Unusum Puwath')
+              )}
+              limit={6}
+            />
+          </div>
+
+          {/* Wigasa Puwath Section with "See More" */}
+          <div id="wigasa-puwath" className="scroll-m-32">
+            {recentWigasaPuwathNews.length > 0 && (
+              <NewsSectionWithToggle
+                title="විගස පුවත්"
+                newsItems={recentWigasaPuwathNews}
+                limit={6}
+              />
+            )}
+          </div>
+
+          {/* Deshiya Puwath Section */}
+          <div id="deshiya-puwath" className='scroll-m-32'>
+            <NewsSectionWithToggle
+              title="දෙශිය පුවත්"
+              newsItems={newsItems.filter((item) =>
+                item.category.includes('deshiya')
+              )}
+              limit={6}
+            />
           </div>
 
           {/* All News Section with "See More" */}
-          <NewsSectionWithToggle title="All News" newsItems={newsItems} limit={9} />
+          <div id="all-news">
+            <NewsSectionWithToggle
+              title="All News"
+              newsItems={newsItems}
+              limit={9}
+            />
+          </div>
 
           {/* Videos Section with "See More" */}
-          <div className="border-2 border-black p-4 lg:p-6 bg-white rounded-md shadow-md max-h-full overflow-auto m-2 lg:m-5">
-            <h2 className="text-base lg:text-sm font-bold mb-2 lg:mb-4">
+          <div className="border-2 border-black p-4 lg:p-6 bg-white rounded-md shadow-md m-2 lg:m-5">
+            <h2 className="text-base lg:text-xl font-bold mb-2 lg:mb-4">
               Videos පුවත්
             </h2>
             <ul>
@@ -270,9 +361,9 @@ export default function NewsPage() {
                   news.videoUrl && (
                     <li
                       key={news._id}
-                      className="flex flex-col  mb-2   p-2 lg:p-5"
+                      className="flex flex-col mb-2 p-2 lg:p-5"
                     >
-                      <div className="w-full   mb-2  ">
+                      <div className="w-full mb-2">
                         <ReactPlayer
                           url={news.videoUrl}
                           controls
@@ -280,7 +371,7 @@ export default function NewsPage() {
                           height="auto"
                         />
                       </div>
-                      <h4 className="font-semibold p-2 lg:p-5 text-xs lg:text-xs">
+                      <h4 className="font-semibold p-2 lg:p-5 text-xs lg:text-sm">
                         {news.title}
                       </h4>
                     </li>
@@ -300,13 +391,9 @@ export default function NewsPage() {
           </div>
         </div>
 
-        {/* Right Sidebar */}
-        <div
-          className={`lg:w-1/5 ${
-            isRightSidebarOpen ? 'block' : 'hidden lg:block'
-          } mt-2 lg:mt-5`}
-        >
-          <div className="bg-gray-100 p-4 rounded-md overflow-auto max-h-[2100px] ml-2 mr-2 lg:ml-5 lg:mr-5">
+        {/* Right Sidebar (Desktop Only) */}
+        <div className="hidden lg:block lg:w-1/5 mt-2 lg:mt-5">
+          <div className="bg-gray-100 p-4 rounded-md ml-2 mr-2 lg:ml-5 lg:mr-5">
             <h3 className="font-bold text-sm lg:text-lg mb-2 lg:mb-4">
               වෙනත් පුවත්
             </h3>
@@ -314,24 +401,28 @@ export default function NewsPage() {
               .filter((item) => item.stype !== 'pinned')
               .slice(0, visibleRightSidebarCount)
               .map((item, index) => (
-                <Link key={index} href={`/newsdetail/${item._id}`} passHref>
+                <Link
+                  key={index}
+                  href={`/newsdetail/${item._id}`}
+                  passHref
+                >
                   <div className="mb-2 lg:mb-4 cursor-pointer hover:bg-gray-200 p-2 lg:p-4 rounded">
-                    <h4 className="font-semibold text-xs lg:text-xs mb-2">
+                    <h4 className="font-semibold text-sm lg:text-base mb-2">
                       {item.title}
                     </h4>
                     <div className="flex flex-col lg:flex-row gap-2">
                       {item.imageUrl && (
-                        <div className="w-full  h-20">
+                        <div className="w-full lg:w-1/3 h-20">
                           <img
                             src={item.imageUrl}
                             alt={item.title}
-                            className="w-full lg:h-20 object-cover rounded-md mb-2 lg:mb-0"
+                            className="w-full h-20 object-cover rounded-md mb-2 lg:mb-0"
                           />
                         </div>
                       )}
                       <div className="w-full lg:w-2/3">
                         <p className="text-gray-600 text-xs text-justify">
-                          {item.content.substring(0,50)}...
+                          {item.content.substring(0, 50)}...
                         </p>
                         <a
                           href={item.link || '#'}
