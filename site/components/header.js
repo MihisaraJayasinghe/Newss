@@ -9,7 +9,7 @@ export default function Header() {
   });
 
   return (
-    <header className="relative flex items-center justify-between h-16 md:h-20 border-b border-black sticky top-0 bg-white p-4 shadow-md">
+    <header className="relative flex items-center justify-between h-8 md:h-16 border-b border-black sticky top-0 bg-white p-4 shadow-md">
       
       {/* Left Section: Date */}
       <div className="flex items-center">

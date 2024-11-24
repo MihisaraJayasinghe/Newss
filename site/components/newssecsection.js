@@ -14,7 +14,7 @@ export default function NewsSection({ newsItems, onPin }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
       {newsItems.map((item, index) => (
         <NewsCard key={index} item={item} />
       ))}
@@ -34,7 +34,7 @@ function NewsCard({ item }) {
 
   return (
     <div
-      className={`bg-white p-6 rounded-lg shadow-md flex flex-col transition-transform duration-300 hover:shadow-xl ${
+      className={`bg-white p-3 rounded-lg shadow-md flex flex-col transition-transform duration-300 hover:shadow-xl ${
         isExpanded ? "transform scale-105" : ""
       }`}
     >
@@ -49,7 +49,7 @@ function NewsCard({ item }) {
         )}
 
         <div className="flex flex-col flex-grow">
-          <h3 className="text-xl font-semibold text-gray-800">{item.title}</h3>
+          <h3 className="text-sm font-semibold text-gray-800">{item.title}</h3>
           <p
             className={`text-gray-600 mt-3 text-sm ${
               isExpanded ? "block" : "line-clamp-3"
@@ -59,7 +59,7 @@ function NewsCard({ item }) {
           </p>
         </div>
       </Link>
-      <div className="mt-4">
+      <div className="mt-2">
         {/* Display the relative published date */}
         <p className="text-gray-500 text-xs">Published: {formattedDate}</p>
         <button
@@ -67,11 +67,11 @@ function NewsCard({ item }) {
             e.preventDefault(); // Prevents Link navigation on button click
             toggleExpand();
           }}
-          className="text-blue-500 mt-2 text-sm underline focus:outline-none"
+          className="text-blue-500 mt-2 text-xs underline focus:outline-none"
           aria-expanded={isExpanded}
           aria-label={isExpanded ? "Collapse content" : "Expand content"}
         >
-          {isExpanded ? "See Less" : "See More"}
+           
         </button>
       </div>
     </div>

@@ -4,8 +4,8 @@ import { faHouseChimney } from "@fortawesome/free-solid-svg-icons";
 
 export default function Navbar() {
   return (
-    <nav className="bg-white border-2 border-black sticky top-14 border-solid text-xs h-20 md:text-md xl:text-sm font-bold py-2">
-      <ul className="flex md:w-2/3 w-full xl:w-2/3 xl:text-lg justify-around ml-auto mr-auto mt-5">
+    <nav className="bg-white border-2 border-black sticky top-14 border-solid text-xs h-20 md:text-sm xl:text-xs font-bold py-2">
+      <ul className="flex md:w-2/3 w-full xl:w-2/3 xl:text-sm justify-around ml-auto mr-auto mt-5">
         
         {/* Home Icon Link */}
         <li className="hover:text-blue-500 flex items-center">

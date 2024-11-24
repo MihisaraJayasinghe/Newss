@@ -193,15 +193,15 @@ export default function NewsPage() {
       )}
 
       {/* Content */}
-      <div className="flex flex-col lg:flex-row flex-grow mt-16 lg:mt-5">
+      <div className="flex flex-col lg:flex-row flex-grow mt-5 ">
         {/* Left Sidebar (Desktop Only) */}
-        <div className="hidden lg:block lg:w-1/5 flex flex-col h-full ml-2 mr-2 mt-2 lg:ml-5 lg:mr-5 rounded-lg lg:mt-5">
+        <div className="hidden lg:block lg:w-80 flex flex-col h-full ml-2 mr-2 mt-2 lg:ml-5 lg:mr-5 rounded-lg lg:mt-5">
           {/* Unusum Puwath Section (Desktop Only) */}
           <div
             id="unusum-puwath-sidebar"
             className="p-4 bg-gray-100 flex-1 mb-4 rounded-lg"
           >
-            <h2 className="text-sm lg:text-lg underline font-bold mb-2 lg:mb-4">
+            <h2 className="text-sm lg:text-xl underline font-bold mb-2 lg:mb-4">
               උනුසුම් පුවත්
             </h2>
             <Sidebar
@@ -243,16 +243,16 @@ export default function NewsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 bg-gray-50 lg:mt-5 flex flex-col rounded-lg">
+        <div className="flex-1 bg-gray-100 lg:mt-5 flex flex-col rounded-lg">
           {/* Pinned News Section */}
           {pinnedNewsItem && (
             <div
               id="pradana-puwath"
-              className="mb-4 scroll-m-40 lg:mb-6 p-4 lg:pl-6 lg:pr-6 bg-white border-4 border-blue-500 rounded-lg shadow-md ml-5 mr-5"
+              className="mb-2 scroll-m-40  p-4 lg:pl-6 lg:pr-6 bg-gray-100 border-2 border-blue-500 rounded-lg shadow-md ml-5 mr-5"
             >
               <Link href={`/newsdetail/${pinnedNewsItem._id}`} passHref>
                 <div className="cursor-pointer">
-                  <h2 className="text-base lg:text-xl font-bold text-gray-800 mb-2 lg:mb-4">
+                  <h2 className="text-base lg:text-2xl font-bold text-gray-800 mb-2 lg:mb-4">
                     ප්‍රධාන පුවත්
                   </h2>
                   {pinnedNewsItem.live === 'live' && (
@@ -260,37 +260,47 @@ export default function NewsPage() {
                       LIVE
                     </span>
                   )}
-                  <h2 className="text-sm lg:text-xl font-bold mb-2 lg:mb-4">
-                    {pinnedNewsItem.title}
-                  </h2>
-                  <div className="flex flex-col md:flex-row gap-2 lg:gap-4">
-                    {pinnedNewsItem.videoUrl &&
-                    pinnedNewsItem.mediaPreference === 'video' ? (
-                      <div className="w-full md:w-1/2 rounded-lg overflow-hidden">
-                        <ReactPlayer
-                          url={pinnedNewsItem.videoUrl}
-                          playing
-                          controls
-                          width="100%"
-                          height="auto"
-                          className="rounded-lg"
-                        />
-                      </div>
-                    ) : pinnedNewsItem.imageUrl ? (
-                      <img
-                        src={pinnedNewsItem.imageUrl}
-                        alt={pinnedNewsItem.title}
-                        className="w-full md:w-1/2 object-cover rounded-md"
-                      />
-                    ) : (
-                      <p className="text-xs">No media available</p>
-                    )}
-                    <div className="flex-1">
-                      <p className="text-gray-600 text-xs lg:text-lg">
-                        {pinnedNewsItem.content.substring(0, 200)}...
-                      </p>
-                    </div>
-                  </div>
+                  
+                  <div className="flex flex-col md:flex-row items-start gap-4">
+  {/* Video Section */}
+  <div className="w-full md:w-1/2">
+    {pinnedNewsItem.videoUrl && pinnedNewsItem.mediaPreference === 'video' ? (
+      <ReactPlayer
+        url={pinnedNewsItem.videoUrl}
+        playing
+        controls
+        width="100%"
+        height="auto"
+        className="rounded-lg"
+      />
+    ) : pinnedNewsItem.imageUrl ? (
+      <img
+        src={pinnedNewsItem.imageUrl}
+        alt={pinnedNewsItem.title}
+        className="w-full object-cover rounded-lg"
+      />
+    ) : (
+      <p className="text-xs">No media available</p>
+    )}
+  </div>
+
+  {/* Text Section */}
+  <div className="w-full md:w-1/2 flex flex-col justify-start">
+    {/* Title */}
+    <h2 className="text-lg lg:text-sm  leading-3 font-bold mb-2">{pinnedNewsItem.title}</h2>
+
+    {/* Content */}
+    <p className="text-gray-600 text-sm lg:text-xs mb-4">
+      {pinnedNewsItem.content.substring(0, 200)}...
+    </p>
+
+    {/* Time or Date Added */}
+    <span className="text-xs lg:text-sm text-blue-500">{dayjs(pinnedNewsItem.createdAt).fromNow()}</span>
+  </div>
+</div>
+
+
+                  
                 </div>
               </Link>
             </div>
@@ -363,12 +373,14 @@ export default function NewsPage() {
                       key={news._id}
                       className="flex flex-col mb-2 p-2 lg:p-5"
                     >
-                      <div className="w-full mb-2">
+                      <div className="w-full mb-2 p-2 ">
                         <ReactPlayer
                           url={news.videoUrl}
                           controls
                           width="100%"
                           height="auto"
+                          className="rounded-lg"
+                          
                         />
                       </div>
                       <h4 className="font-semibold p-2 lg:p-5 text-xs lg:text-sm">
@@ -392,9 +404,9 @@ export default function NewsPage() {
         </div>
 
         {/* Right Sidebar (Desktop Only) */}
-        <div className="hidden lg:block lg:w-1/5 mt-2 lg:mt-5">
+        <div className="hidden lg:block lg:w-96  lg:mt-5">
           <div className="bg-gray-100 p-4 rounded-md ml-2 mr-2 lg:ml-5 lg:mr-5">
-            <h3 className="font-bold text-sm lg:text-lg mb-2 lg:mb-4">
+            <h3 className="font-bold text-sm lg:text-xl mb-2 lg:mb-4 ml-2">
               වෙනත් පුවත්
             </h3>
             {newsItems
@@ -406,30 +418,26 @@ export default function NewsPage() {
                   href={`/newsdetail/${item._id}`}
                   passHref
                 >
-                  <div className="mb-2 lg:mb-4 cursor-pointer hover:bg-gray-200 p-2 lg:p-4 rounded">
-                    <h4 className="font-semibold text-sm lg:text-base mb-2">
-                      {item.title}
+                  <div className=" lg:mb-4 cursor-pointer hover:bg-gray-200 p-2 lg:p-4 rounded">
+                    <h4 className="font-semibold text-md lg:text-sm text-justify mb-2">
+                      {item.title.substring(0, 50)}...
+                  
                     </h4>
                     <div className="flex flex-col lg:flex-row gap-2">
                       {item.imageUrl && (
-                        <div className="w-full lg:w-1/3 h-20">
+                        <div className="w-full lg:w-32  scale h-24 overflow-hidden">
                           <img
                             src={item.imageUrl}
                             alt={item.title}
-                            className="w-full h-20 object-cover rounded-md mb-2 lg:mb-0"
+                            className=" object-cover rounded-md mb-2 lg:mb-0"
                           />
                         </div>
                       )}
-                      <div className="w-full lg:w-2/3">
+                      <div className="w-full pl-2 lg:w-2/3 ">
                         <p className="text-gray-600 text-xs text-justify">
-                          {item.content.substring(0, 50)}...
+                          {item.content.substring(0, 160)}...
                         </p>
-                        <a
-                          href={item.link || '#'}
-                          className="text-blue-500 text-xs lg:text-sm"
-                        >
-                          Read more
-                        </a>
+                         
                       </div>
                     </div>
                   </div>
@@ -442,7 +450,7 @@ export default function NewsPage() {
                     ? handleRightSidebarSeeLess
                     : handleRightSidebarSeeMore
                 }
-                className="mt-2 lg:mt-4 text-blue-500 text-xs lg:text-sm underline"
+                className="  text-blue-500 text-xs lg:text-sm underline"
               >
                 {isRightSidebarExpanded ? 'See Less' : 'See More'}
               </button>

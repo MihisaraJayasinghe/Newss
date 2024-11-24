@@ -26,7 +26,7 @@ export default function Sidebar({ newsItems }) {
     <div className="space-y-4">
       {newsItems.slice(0, 5).map((item) => (
         <Link key={item._id} href={`/newsdetail/${item._id}`} passHref>
-          <div className="mt-10 cursor-pointer">
+          <div className="cursor-pointer">
             {/* LIVE Badge */}
             {item.live === "live" && (
               <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
@@ -46,11 +46,11 @@ export default function Sidebar({ newsItems }) {
                 />
               )}
               {/* News Content */}
-              <div className="flex-1 ml-5">
-                <p className="text-gray-600 text-xs">
-                  {item.content.substring(0, 50)}...
+              <div className="flex-1 ml-5 ">
+                <p className="text-gray-600 mr-5  ml-2 text-justify text-xs">
+                  {item.content.substring(0, 100)}...
                 </p>
-                <p className="text-blue-500 text-xs mt-2">
+                <p className="text-blue-500 text-xs text-right mt-2 mr-5">
                   {getTimeDisplay(item.publishedAt)}
                 </p>
               </div>
