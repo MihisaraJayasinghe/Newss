@@ -253,7 +253,7 @@ export default function NewsPage() {
               <Link href={`/newsdetail/${pinnedNewsItem._id}`} passHref>
                 <div className="cursor-pointer">
                   <h2 className="text-base lg:text-2xl font-bold text-gray-800 mb-2 lg:mb-4">
-                    ප්‍රධාන පුවත්
+                    ප්‍රධාන පුවත් වීඩියෝව 
                   </h2>
                   {pinnedNewsItem.live === 'live' && (
                     <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
@@ -425,17 +425,19 @@ export default function NewsPage() {
                     </h4>
                     <div className="flex flex-col lg:flex-row gap-2">
                       {item.imageUrl && (
-                        <div className="w-full lg:w-32  scale h-24 overflow-hidden">
+                        <div className="   ">
                           <img
                             src={item.imageUrl}
                             alt={item.title}
-                            className=" object-cover rounded-md mb-2 lg:mb-0"
+                            className=" w-32 h-24 object- rounded-md  lg:mb-0"
+                            
+
                           />
                         </div>
                       )}
                       <div className="w-full pl-2 lg:w-2/3 ">
-                        <p className="text-gray-600 text-xs text-justify">
-                          {item.content.substring(0, 160)}...
+                        <p className="text-gray-600 text-xs text-ju stify">
+                          {item.content.substring(0, 140)}...
                         </p>
                          
                       </div>

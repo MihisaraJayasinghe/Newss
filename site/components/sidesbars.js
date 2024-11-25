@@ -48,7 +48,7 @@ export default function Sidebar({ newsItems }) {
               {/* News Content */}
               <div className="flex-1 ml-5 ">
                 <p className="text-gray-600 mr-5  ml-2 text-justify text-xs">
-                  {item.content.substring(0, 100)}...
+                  {item.content.substring(0, 80)}...
                 </p>
                 <p className="text-blue-500 text-xs text-right mt-2 mr-5">
                   {getTimeDisplay(item.publishedAt)}
