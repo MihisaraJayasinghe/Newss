@@ -12,7 +12,7 @@ export default function Header() {
     <header className="sticky top-0 bg-white shadow-md border-b border-black">
       <div className="flex items-center justify-between h-16 px-4 md:px-8">
         {/* Left Section: Current Date */}
-        <div className="text-gray-600 text-sm md:text-lg">{currentDate}</div>
+        <div className="text-gray-600 text-xs w-20 md:text-lg">{currentDate}</div>
 
         {/* Center Section: Title */}
         <div className="absolute left-1/2 transform -translate-x-1/2 text-center">

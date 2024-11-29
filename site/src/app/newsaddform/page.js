@@ -364,7 +364,7 @@ if (!isAuthenticated) {
         <p className="text-sm text-gray-500">Tags: {item.tag.join(', ')}</p>
       </div>
       {/* Action Buttons */}
-      <div className="mt-4 m-2 xl:mt-0   space-x-2">
+      <div className="mt-4   xl:mt-0 flex h  space-x-2">
         <button
           onClick={() => toggleLiveStatus(item._id, item.live === 'live')}
           className={`px-4 py-2 sm:m-2 rounded ${

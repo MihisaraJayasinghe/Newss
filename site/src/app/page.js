@@ -267,7 +267,7 @@ export default function NewsPage() {
     {pinnedNewsItem.videoUrl && pinnedNewsItem.mediaPreference === 'video' ? (
       <ReactPlayer
         url={pinnedNewsItem.videoUrl}
-        playing
+         
         controls
         width="100%"
         height="auto"
