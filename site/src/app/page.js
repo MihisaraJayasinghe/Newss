@@ -9,10 +9,13 @@ import ReactPlayer from 'react-player';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 
+
 // Reusable component for main news sections with "See More" functionality
 const NewsSectionWithToggle = ({ title, newsItems, limit = 6 }) => {
   const [visibleCount, setVisibleCount] = useState(limit);
   const [isExpanded, setIsExpanded] = useState(false);
+
+
 
   const handleSeeMore = () => {
     setVisibleCount(newsItems.length);
@@ -104,14 +107,23 @@ export default function NewsPage() {
     setIsRightSidebarExpanded(false);
   };
 
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <Navbar />
 
       {/* Mobile Hamburger Menu */}
-      <header className="fixed top-0 left-0 w-full bg-gray-800 text-white flex justify-between items-center p-4 z-50 lg:hidden">
-        <h1 className="text-lg font-bold">News Portal</h1>
+      <header className="fixed top-0 left-0 w-full bg-white text-black flex justify-between items-center p-4 z-50 lg:hidden">
+      <div className="text-gray-600 text-xs w-20 md:text-lg">{currentDate}</div>
+        <h1 className="text-lg text-center font-bold">News Web</h1>
+
+
+        
         <button
           onClick={toggleSidebar}
           className="text-2xl focus:outline-none"
