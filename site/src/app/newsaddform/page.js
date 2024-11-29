@@ -5,6 +5,10 @@ import Header from '../../../components/header';
 import Navbar from '../../../components/navbar';
 import dayjs from 'dayjs';
 
+
+
+
+
 export default function NewsAddForm() {
   const [newsItems, setNewsItems] = useState([]);
   const [filteredNews, setFilteredNews] = useState([]);
@@ -174,6 +178,61 @@ export default function NewsAddForm() {
       }
     }
   };
+
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
+
+const handleLogin = (e) => {
+  e.preventDefault();
+  if (loginCredentials.username === 'admin' && loginCredentials.password === '1234') {
+    setIsAuthenticated(true);
+  } else {
+    alert('Invalid credentials!');
+  }
+};
+
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  setLoginCredentials({ ...loginCredentials, [name]: value });
+};
+
+if (!isAuthenticated) {
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white shadow-lg rounded-lg p-6 w-full max-w-sm space-y-4"
+      >
+        <h2 className="text-2xl font-bold text-center text-gray-800">Admin Login</h2>
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={loginCredentials.username}
+          onChange={handleInputChange}
+          className="w-full p-2 border border-gray-300 rounded"
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={loginCredentials.password}
+          onChange={handleInputChange}
+          className="w-full p-2 border border-gray-300 rounded"
+          required
+        />
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Login
+        </button>
+      </form>
+    </div>
+  );
+}
 
   const toggleLiveStatus = async (id, isLive) => {
     try {
