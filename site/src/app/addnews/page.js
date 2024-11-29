@@ -3,176 +3,165 @@
 import { useState, useEffect } from 'react';
 import Header from '../../../components/header';
 import Navbar from '../../../components/navbar';
-import ReactPlayer from 'react-player';
 
-export default function NewsPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginUsername, setLoginUsername] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+export default function NewsAddForm() {
   const [newsItems, setNewsItems] = useState([]);
-  const [pinnedNewsItem, setPinnedNewsItem] = useState(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    category: '',
+    author: '',
+    stype: '', // Pin status
+    live: '', // Live status
+    tag: [],
+    imageUrl: '',
+    videoUrl: '',
+    mediaPreference: 'image',
+  });
+  const [editingId, setEditingId] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'add'
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      const fetchNews = async () => {
-        try {
-          const response = await fetch('/api/news');
-          if (response.ok) {
-            const data = await response.json();
-            setNewsItems(data.data || []);
-          }
-        } catch (error) {
-          console.error('Error fetching news:', error);
-        }
-      };
-      fetchNews();
-    }
-  }, [isAuthenticated]);
-
-  const handleLogin = () => {
-    if (loginUsername === 'admin' && loginPassword === '1234') {
-      setIsAuthenticated(true);
-    } else {
-      alert('Incorrect username or password');
+  // Fetch all news
+  const fetchNews = async () => {
+    try {
+      const response = await fetch('/api/addnewsform');
+      const data = await response.json();
+      setNewsItems(data.data || []);
+    } catch (error) {
+      console.error('Error fetching news:', error);
     }
   };
 
-  // Filter news items based on search term
-  const filteredNewsItems = newsItems.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchNews();
+  }, []);
 
-  if (!isAuthenticated) {
-    return (
-      <div className="flex items-  justify-center h-screen ">
-        <div className="w-full max-w-sm  -white p-8 rounded-lg  ">
-          <h2 className="text-center text-3xl font-semibold text-gray-800 mb-6">Admin Login</h2>
-          <input
-            type="text"
-            placeholder="Username"
-            value={loginUsername}
-            onChange={(e) => setLoginUsername(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded mb-4 text-gray-800 focus:outline-none focus:ring focus:ring-blue-300"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded mb-4 text-gray-800 focus:outline-none focus:ring focus:ring-blue-300"
-          />
-          <button
-            onClick={handleLogin}
-            className="w-full bg-blue-600 text-white p-3 rounded font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Login
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Handle "Go Live" Toggle
+  const toggleLiveStatus = async (id, isLive) => {
+    try {
+      const response = await fetch(`/api/addnewsform?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ live: isLive ? '' : 'live' }),
+      });
+      if (response.ok) {
+        fetchNews();
+      } else {
+        console.error('Error toggling live status:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error toggling live status:', error);
+    }
+  };
+
+  // Handle Pin News
+  const handlePin = async (id) => {
+    try {
+      // Unpin previously pinned news
+      await fetch('/api/addnewsform', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stype: '' }),
+      });
+
+      // Pin the current news
+      const response = await fetch(`/api/addnewsform?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stype: 'pinned' }),
+      });
+      if (response.ok) {
+        fetchNews();
+      } else {
+        console.error('Error pinning news:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error pinning news:', error);
+    }
+  };
+
+  // Handle Search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const query = searchTerm ? `?title=${searchTerm}` : '';
+    fetchNews(query);
+  };
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto p-6">
       <Header />
       <Navbar />
+      <div className="flex space-x-4 mt-4 border-b-2">
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className={`px-4 py-2 ${
+            activeTab === 'dashboard' ? 'border-b-4 border-blue-500 text-blue-500' : 'text-gray-500'
+          }`}
+        >
+          Dashboard
+        </button>
+        <button
+          onClick={() => setActiveTab('add')}
+          className={`px-4 py-2 ${
+            activeTab === 'add' ? 'border-b-4 border-blue-500 text-blue-500' : 'text-gray-500'
+          }`}
+        >
+          Add/Edit News
+        </button>
+      </div>
 
-      {/* Search bar */}
-      <input
-        type="text"
-        placeholder="Search by title..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="p-2 border border-gray-300 rounded w-3/4 md:w-1/2 mb-6"
-      />
-
-      {/* Display Pinned News */}
-      {pinnedNewsItem && (
-        <div className="w-full mb-6 p-4 bg-white border-2 border-blue-500 rounded-lg shadow-md max-w-md">
-          <h2 className="text-lg font-bold text-gray-800 mb-2">Pinned News</h2>
-          <div className="w-full">
-            {pinnedNewsItem.videoUrl && pinnedNewsItem.mediaPreference === 'video' ? (
-              <ReactPlayer
-                url={pinnedNewsItem.videoUrl}
-                playing
-                controls
-                width="100%"
-                height="200px"
-                className="rounded-lg mb-2"
-              />
-            ) : pinnedNewsItem.imageUrl ? (
-              <img
-                src={pinnedNewsItem.imageUrl}
-                alt={pinnedNewsItem.title}
-                className="w-full h-48 object-cover rounded-md mb-2"
-              />
-            ) : (
-              <p>No media available</p>
-            )}
-            <h2 className="text-xl font-bold mb-2">{pinnedNewsItem.title}</h2>
-            <p className="text-gray-600 mb-2">{pinnedNewsItem.content.substring(0, 100)}...</p>
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              onClick={handleUnpin}
-            >
-              Unpin
+      {/* Dashboard Tab */}
+      {activeTab === 'dashboard' && (
+        <div className="mt-6">
+          <form onSubmit={handleSearch} className="flex space-x-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search news..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+              Search
             </button>
+          </form>
+          <div className="grid grid-cols-1 gap-4">
+            {newsItems.map((item) => (
+              <div
+                key={item._id}
+                className="flex items-center justify-between p-4 border rounded-lg bg-white shadow-sm"
+              >
+                <img
+                  src={item.imageUrl || '/placeholder-image.jpg'}
+                  alt={item.title}
+                  className="w-20 h-20 object-cover rounded-md"
+                />
+                <div className="flex-grow ml-4">
+                  <h3 className="font-bold">{item.title}</h3>
+                  <p className="text-sm text-gray-500">{item.category}</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => toggleLiveStatus(item._id, item.live === 'live')}
+                    className={`px-4 py-2 rounded ${
+                      item.live === 'live' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'
+                    } text-white`}
+                  >
+                    {item.live === 'live' ? 'Remove Live' : 'Go Live'}
+                  </button>
+                  <button
+                    onClick={() => handlePin(item._id)}
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                  >
+                    Pin
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
-
-      {/* News Card Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full p-6">
-        {filteredNewsItems.map((item) => (
-          <div key={item._id} className="bg-white rounded-lg shadow-lg p-4 relative">
-            {/* Display "Live" badge if the item is live */}
-            {item.live === 'live' && (
-              <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                LIVE
-              </span>
-            )}
-            <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-            {item.videoUrl ? (
-              <ReactPlayer
-                url={item.videoUrl}
-                playing={false}
-                controls
-                width="100%"
-                height="200px"
-                className="rounded-lg mb-4"
-              />
-            ) : item.imageUrl ? (
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-            ) : (
-              <p>No media available</p>
-            )}
-            <p>{item.content.substring(0, 100)}...</p>
-            <p><strong>Author:</strong> {item.author}</p>
-            <p><strong>Category:</strong> {item.category}</p>
-            <button
-              onClick={() => handlePin(item)}
-              className={`mt-2 px-4 py-2 rounded ${
-                item.stype === 'pinned' ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600'
-              } text-white`}
-            >
-              {item.stype === 'pinned' ? 'Pinned' : 'Pin'}
-            </button>
-            <button
-              onClick={() => toggleLiveStatus(item._id, item.live === 'live')}
-              className={`mt-2 px-4 py-2 rounded ${
-                item.live === 'live' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'
-              } text-white ml-2`}
-            >
-              {item.live === 'live' ? 'Remove Live' : 'Go Live'}
-            </button>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

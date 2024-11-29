@@ -287,10 +287,10 @@ export default function NewsPage() {
   {/* Text Section */}
   <div className="w-full md:w-1/2 flex flex-col justify-start">
     {/* Title */}
-    <h2 className="text-lg lg:text-sm  leading-3 font-bold mb-2">{pinnedNewsItem.title}</h2>
+    <h2 className="text-xs lg:text-sm   font-bold mb-2">{pinnedNewsItem.title}</h2>
 
     {/* Content */}
-    <p className="text-gray-600 text-sm lg:text-xs mb-4">
+    <p className="text-gray-600 text-xs lg:text-xs mb-4">
       {pinnedNewsItem.content.substring(0, 200)}...
     </p>
 

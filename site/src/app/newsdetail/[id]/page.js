@@ -1,101 +1,69 @@
-// app/newsdetail/[id]/page.js
-
 'use client';
 
 import { useState, useEffect } from 'react';
-import Header from '../../../../components/header'
-import Navbar from '../../../../components/navbar'; // Ensure correct path and case
+import Header from '../../../../components/header';
+import Navbar from '../../../../components/navbar';
 import Link from 'next/link';
 
 export default function NewsDetail({ params }) {
   const [newsItem, setNewsItem] = useState(null);
-  const [sidebarNewsItems, setSidebarNewsItems] = useState([]);
-  const { id } = params; // Get the dynamic ID from the params
-  const [error, setError] = useState(null);
+  const [relatedNews, setRelatedNews] = useState([]);
+  const [comments, setComments] = useState([
+    { id: 1, author: 'Ashan Silva', text: 'This is a placeholder comment.', time: '1h' },
+    { id: 2, author: 'Nimal Perera', text: 'Great insights!', time: '2h' },
+  ]);
+  const [newComment, setNewComment] = useState('');
+  const { id } = params;
 
-  // Function to calculate relative time
-  const getRelativeTime = (date) => {
-    const now = new Date();
-    const publishedDate = new Date(date);
-    const diffInSeconds = Math.floor((now - publishedDate) / 1000);
-
-    const intervals = [
-      { label: 'year', seconds: 31536000 },
-      { label: 'month', seconds: 2592000 },
-      { label: 'week', seconds: 604800 },
-      { label: 'day', seconds: 86400 },
-      { label: 'hour', seconds: 3600 },
-      { label: 'minute', seconds: 60 },
-      { label: 'second', seconds: 1 },
-    ];
-
-    for (const interval of intervals) {
-      const count = Math.floor(diffInSeconds / interval.seconds);
-      if (count >= 1) {
-        return `${count} ${interval.label}${count !== 1 ? 's' : ''} ago`;
+  const fetchNewsDetail = async () => {
+    try {
+      const response = await fetch(`/api/news?id=${id}`);
+      const data = await response.json();
+      if (data.success) {
+        setNewsItem(data.data);
       }
+    } catch (error) {
+      console.error('Error fetching news article:', error);
     }
-
-    return 'Just now';
   };
 
-  // Fetch the main news article details using the `id` from the URL
+  const fetchRelatedNews = async () => {
+    try {
+      const response = await fetch('/api/news');
+      const data = await response.json();
+      if (data.success && newsItem) {
+        const related = data.data.filter(
+          (item) =>
+            item._id !== newsItem._id &&
+            (item.category === newsItem.category || item.tag.some((tag) => newsItem.tag.includes(tag)))
+        );
+        setRelatedNews(related.slice(0, 3)); // Limit to 3 related news items
+      }
+    } catch (error) {
+      console.error('Error fetching related news:', error);
+    }
+  };
+
   useEffect(() => {
     if (id) {
-      const fetchNewsDetail = async () => {
-        try {
-          const response = await fetch(`/api/news?id=${id}`); // Fetch the news by `id`
-          const data = await response.json();
-          if (data.success) {
-            setNewsItem(data.data); // Set the news data to state
-          } else {
-            console.error('Error fetching news details:', data.message);
-            setError('Failed to load news details.');
-          }
-        } catch (error) {
-          console.error('Error fetching news article:', error);
-          setError('An unexpected error occurred.');
-        }
-      };
-
       fetchNewsDetail();
     }
-  }, [id]); // Trigger this effect whenever `id` changes
+  }, [id]);
 
-  // Fetch additional news items for the sidebar
   useEffect(() => {
-    const fetchSidebarNews = async () => {
-      try {
-        const response = await fetch('/api/news'); // Fetch all news for the sidebar
-        const data = await response.json();
-        if (data.success) {
-          setSidebarNewsItems(data.data.slice(0, 5)); // Limit to 5 news items
-        }
-      } catch (error) {
-        console.error('Error fetching sidebar news:', error);
-      }
-    };
+    if (newsItem) {
+      fetchRelatedNews();
+    }
+  }, [newsItem]);
 
-    fetchSidebarNews();
-  }, []);
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (newComment.trim()) {
+      setComments([...comments, { id: Date.now(), author: 'User', text: newComment, time: 'Just now' }]);
+      setNewComment('');
+    }
+  };
 
-  // Handle error state
-  if (error) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <Header/>
-        <Navbar />
-        <main className="flex-grow flex justify-center items-center">
-          <p className="text-red-500 text-lg">{error}</p>
-        </main>
-        <footer className="bg-gray-800 text-white text-center py-4">
-          &copy; {new Date().getFullYear()} Your News Website. All rights reserved.
-        </footer>
-      </div>
-    );
-  }
-
-  // Handle loading state
   if (!newsItem) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -113,12 +81,18 @@ export default function NewsDetail({ params }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header/>
-      <Navbar/>
+      <Header />
+      <Navbar />
       <main className="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
         {/* Main news content */}
         <article className="w-full lg:w-3/4 lg:pr-8">
-          <h1 className="text-3xl lg:text-5xl font-bold mb-6 text-gray-800">
+          <button
+            onClick={() => history.back()}
+            className="text-blue-600 underline mb-4"
+          >
+            Go Back
+          </button>
+          <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-gray-800">
             {newsItem.title}
           </h1>
           {newsItem.imageUrl && (
@@ -126,62 +100,95 @@ export default function NewsDetail({ params }) {
               src={newsItem.imageUrl}
               alt={newsItem.title}
               className="w-full h-64 lg:h-96 object-cover rounded-md mb-6"
-              loading="lazy" // Lazy load the image for better performance
+              loading="lazy"
             />
-          )}
-          {newsItem.videoUrl && (
-            <div className="mb-6">
-              <video
-                controls
-                className="w-full h-auto rounded-md"
-                preload="metadata"
-              >
-                <source src={newsItem.videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
           )}
           <section className="text-base lg:text-lg text-gray-700 mb-6">
             {newsItem.content}
           </section>
           <div className="text-gray-500 text-sm">
             <p>Published by: {newsItem.author}</p>
-            <p>Published: {getRelativeTime(newsItem.publishedAt)}</p>
+            <p>Published: {new Date(newsItem.publishedAt).toLocaleString()}</p>
+          </div>
+          {/* Social Share */}
+          <div className="flex space-x-4 mt-6">
+            <span>Share:</span>
+            <a href="#" className="text-blue-500">
+              Facebook
+            </a>
+            <a href="#" className="text-blue-400">
+              Twitter
+            </a>
+            <a href="#" className="text-pink-500">
+              Instagram
+            </a>
+          </div>
+          {/* Post Comment Section */}
+          <div className="mt-8">
+            <h3 className="text-xl font-bold mb-4">Post New Comment</h3>
+            <form onSubmit={handleCommentSubmit} className="flex flex-col space-y-4">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Post your comment..."
+                className="w-full p-3 border border-gray-300 rounded"
+              />
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+                Post Comment
+              </button>
+            </form>
           </div>
         </article>
 
-        {/* Scrollable Sidebar with other news */}
-        <aside className="w-full lg:w-1/4 bg-gray-100 p-6 rounded-md mt-8 lg:mt-0 lg:max-h-screen lg:overflow-y-auto">
-          <h3 className="font-bold text-2xl mb-6 text-gray-800">Other News</h3>
-          {sidebarNewsItems.length > 0 ? (
-            sidebarNewsItems.map((item) => (
+        {/* Right Sidebar: Related News & Comments */}
+        <aside className="w-full lg:w-1/4 bg-gray-100 p-4 rounded-md mt-8 lg:mt-0">
+          {/* Related News */}
+          <h3 className="font-bold text-xl mb-4 text-gray-800">Related News</h3>
+          {relatedNews.length > 0 ? (
+            relatedNews.map((item) => (
               <Link
                 key={item._id}
                 href={`/newsdetail/${item._id}`}
-                className="flex flex-col mb-6 hover:bg-gray-200 p-3 rounded-md transition-colors duration-200"
+                className="flex flex-col mb-4 hover:bg-gray-200 p-2 rounded-md transition-colors duration-200"
               >
                 {item.imageUrl && (
                   <img
                     src={item.imageUrl}
                     alt={item.title}
-                    className="w-full h-24 object-cover rounded-md mb-3"
+                    className="w-full h-20 object-cover rounded-md mb-2"
                     loading="lazy"
                   />
                 )}
-                <h4 className="font-semibold text-lg text-gray-800 mb-1">
+                <h4 className="font-semibold text-sm text-gray-800 mb-1 line-clamp-2">
                   {item.title}
                 </h4>
-                <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                  {item.content}
-                </p>
                 <span className="text-gray-500 text-xs">
-                  Published: {getRelativeTime(item.publishedAt)}
+                  Published: {new Date(item.publishedAt).toLocaleDateString()}
                 </span>
               </Link>
             ))
           ) : (
-            <p className="text-gray-600">No other news available</p>
+            <p className="text-gray-600">No related news available.</p>
           )}
+
+          {/* Comments Section */}
+          <div className="mt-6 bg-white p-2 h-screen">
+            <h3 className="text-xl font-bold  mb-4">Comments</h3>
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex items-start space-x-4 mb-4">
+                <img
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(comment.author)}&background=random`}
+                  alt={`${comment.author}'s avatar`}
+                  className="w-10 h-10 rounded-full"
+                />
+                <div className="bg-white p-4 rounded-lg shadow-md">
+                  <p className="font-bold text-xs text-gray-800">{comment.author}</p>
+                  <p className="text-xs text-gray-600">{comment.text}</p>
+                  <span className="text-xs text-gray-400">{comment.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </aside>
       </main>
       <footer className="bg-gray-800 text-white text-center py-4">

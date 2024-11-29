@@ -3,431 +3,424 @@
 import { useState, useEffect } from 'react';
 import Header from '../../../components/header';
 import Navbar from '../../../components/navbar';
-import Link from 'next/link';
+import dayjs from 'dayjs';
+
 export default function NewsAddForm() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [newsItems, setNewsItems] = useState([]);
+  const [filteredNews, setFilteredNews] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     category: '',
     author: '',
-    stype: '', // Field to specify if the news is pinned
+    stype: '',
+    live: '',
+    tag: [],
     imageUrl: '',
-    tag: '',
     videoUrl: '',
+    mediaPreference: 'image',
   });
   const [editingId, setEditingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'add'
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    category: '',
+    date: '',
+    tag: '',
+  });
 
-  // Categories and tags
-  const categories = ['Politics', 'wyapara puwath', 'deshiya puwath', 'wideshiya'];
-  const tags = ['Unusum Puwath', 'Pradana Puwath'];
+  const now = dayjs();
 
-  // Handle admin login
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (username === 'admin' && password === '1234') {
-      setIsAdmin(true);
-    } else {
-      alert('Invalid credentials!');
+  const getTimeDisplay = (timestamp) => {
+    const publishedTime = dayjs(timestamp);
+    if (!publishedTime.isValid()) {
+      console.warn('Invalid date:', timestamp);
+      return 'Unknown time';
     }
+
+    const diffInMinutes = now.diff(publishedTime, 'minute');
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInMinutes < 1440) return `${now.diff(publishedTime, 'hour')} hours ago`;
+    return publishedTime.format('YYYY/MM/DD h:mm A');
   };
 
-  // Fetch news from API
   const fetchNews = async () => {
     try {
       const response = await fetch('/api/news');
       const data = await response.json();
       setNewsItems(data.data || []);
+      setFilteredNews(data.data || []);
     } catch (error) {
       console.error('Error fetching news:', error);
     }
   };
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchNews();
-    }
-  }, [isAdmin]);
+    fetchNews();
+  }, []);
 
-  // Handle adding news
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
+  const handleFilter = () => {
+    let filtered = newsItems;
 
-    // Unpin any previously pinned news if this item is set to be pinned
-    if (formData.stype === 'pin') {
-      await unpinPreviousNews();
+    if (filters.category) {
+      filtered = filtered.filter((item) => item.category === filters.category);
     }
 
-    try {
-      const response = await fetch('/api/news', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setFormData({
-          title: '',
-          content: '',
-          category: '',
-          author: '',
-          stype: '',
-          imageUrl: '',
-          tag: '',
-          videoUrl: '',
-        });
-        alert('News added successfully!');
-        fetchNews();
-      } else {
-        console.error('Error submitting news:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error submitting news:', error);
+    if (filters.date) {
+      const selectedDate = dayjs(filters.date).startOf('day');
+      filtered = filtered.filter((item) =>
+        dayjs(item.publishedAt).isSame(selectedDate, 'day')
+      );
     }
+
+    if (filters.tag) {
+      filtered = filtered.filter((item) =>
+        item.tag.some((tag) => tag.toLowerCase().includes(filters.tag.toLowerCase()))
+      );
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter((item) =>
+        item.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredNews(filtered);
   };
 
-  // Handle updating news
-  const handleUpdateSubmit = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    handleFilter();
+  }, [filters, searchTerm, newsItems]);
 
-    if (!editingId) {
-      alert('No news selected for editing!');
-      return;
-    }
-
-    // Unpin any previously pinned news if this item is set to be pinned
-    if (formData.stype === 'pin') {
-      await unpinPreviousNews();
-    }
-
-    try {
-      const response = await fetch(`/api/addnewsform?id=${editingId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          tag: formData.tag.split(',').map(tag => tag.trim()), // Ensure tags are saved as an array
-        }),
-      });
-
-      if (response.ok) {
-        setFormData({
-          title: '',
-          content: '',
-          category: '',
-          author: '',
-          stype: '',
-          imageUrl: '',
-          tag: '',
-          videoUrl: '',
-        });
-        alert('News updated successfully!');
-        setEditingId(null);
-        setActiveTab('all');
-        fetchNews();
-      } else {
-        console.error('Error updating news:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error updating news:', error);
-    }
-  };
-
-  // Function to unpin previously pinned news
-  const unpinPreviousNews = async () => {
-    try {
-      const response = await fetch('/api/news?stype=pin', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ stype: '' }), // Unpin previous news
-      });
-      if (!response.ok) {
-        console.error('Error unpinning previous news:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error unpinning previous news:', error);
-    }
-  };
-
-  // Function to edit a selected news item
-  const handleEdit = (news) => {
-    setEditingId(news._id);
+  const handleEdit = (item) => {
     setFormData({
-      title: news.title,
-      content: news.content,
-      category: news.category,
-      author: news.author,
-      imageUrl: news.imageUrl,
-      stype: news.stype,
-      tag: news.tag.join(', '),
-      videoUrl: news.videoUrl,
+      title: item.title,
+      content: item.content,
+      category: item.category,
+      author: item.author,
+      stype: item.stype,
+      live: item.live,
+      tag: item.tag,
+      imageUrl: item.imageUrl,
+      videoUrl: item.videoUrl,
+      mediaPreference: item.mediaPreference,
     });
+    setEditingId(item._id);
     setActiveTab('add');
   };
 
-  // Handle tab switching
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-    if (tab === 'add') {
-      setEditingId(null);
-      setFormData({
-        title: '',
-        content: '',
-        category: '',
-        author: '',
-        stype: '',
-        imageUrl: '',
-        tag: '',
-        videoUrl: '',
+  const handleAddEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const method = editingId ? 'PUT' : 'POST';
+      const url = editingId ? `/api/addnewsform?id=${editingId}` : '/api/addnewsform';
+      const body = {
+        title: formData.title,
+        content: formData.content,
+        category: formData.category,
+        author: formData.author,
+        imageUrl: formData.imageUrl,
+        videoUrl: formData.videoUrl,
+        tag: formData.tag,
+      };
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
+
+      if (response.ok) {
+        alert(editingId ? 'News updated successfully!' : 'News added successfully!');
+        setFormData({
+          title: '',
+          content: '',
+          category: '',
+          author: '',
+          imageUrl: '',
+          videoUrl: '',
+          tag: [],
+        });
+        setEditingId(null);
+        setActiveTab('dashboard');
+        fetchNews();
+      } else {
+        const error = await response.json();
+        console.error('Error submitting news:', error.message || response.statusText);
+        alert(`Error: ${error.message || 'Failed to submit news.'}`);
+      }
+    } catch (error) {
+      console.error('Error submitting news:', error);
+      alert('An error occurred. Please try again.');
     }
   };
 
-  // Filter news items by category or tag
-  const filteredNewsItems = newsItems.filter(news => {
-    const tagMatch = selectedTag ? news.tag.some(tag => tag.toLowerCase().includes(selectedTag.toLowerCase())) : true;
-    return (!selectedCategory || news.category === selectedCategory) && tagMatch;
-  });
+  const handleDelete = async (id) => {
+    if (confirm('Are you sure you want to delete this news?')) {
+      try {
+        const response = await fetch(`/api/news?id=${id}`, {
+          method: 'DELETE',
+        });
 
-  if (!isAdmin) {
-    return (
-      <div className="max-w-md mx-auto p-6">
-        <h2 className="text-2xl font-bold mb-4">Admin Login</h2>
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-gray-700">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-          >
-            Login
-          </button>
-        </form>
-      </div>
-    );
-  }
+        if (response.ok) {
+          alert('News deleted successfully!');
+          fetchNews();
+        } else {
+          console.error('Error deleting news:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error deleting news:', error);
+      }
+    }
+  };
+
+  const toggleLiveStatus = async (id, isLive) => {
+    try {
+      const response = await fetch(`/api/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, live: isLive ? '' : 'live' }),
+      });
+
+      if (response.ok) {
+        alert(`News ${isLive ? 'unmarked' : 'marked'} as live`);
+        fetchNews();
+      } else {
+        console.error('Error toggling live status:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error toggling live status:', error);
+    }
+  };
+
+  const handlePin = async (id) => {
+    try {
+      await fetch('/api/news', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stype: '' }),
+      });
+
+      const response = await fetch(`/api/news?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stype: 'pinned' }),
+      });
+
+      if (response.ok) {
+        alert('News pinned successfully!');
+        fetchNews();
+      } else {
+        console.error('Error pinning news:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error pinning news:', error);
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-     
+    <div className="max-w-6xl mx-auto p-6">
       <Header />
       <Navbar />
-      <Link href='/addnews' passHref> 
-      <button
-         add news status
-          className={`px-4 py-2 bg-blue-500  `}>
-       
-          add news status
-        </button>
-        </Link>
-
-      {/* Tab Navigation */}
-      <div className="flex space-x-4 mt-4">
+      <div className="flex justify-center mt-4 flex-col md:flex-row">
         <button
-          onClick={() => handleTabClick('all')}
-          className={`px-4 py-2 ${activeTab === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => {
+            setActiveTab('dashboard');
+            setEditingId(null);
+          }}
+          className={`px-6 py-2 rounded-t-lg ${
+            activeTab === 'dashboard' ? 'bg-gray-200 text-blue-600 font-bold' : 'bg-gray-100 text-gray-500'
+          }`}
         >
-          View News
+          Dashboard
         </button>
         <button
-          onClick={() => handleTabClick('add')}
-          className={`px-4 py-2 ${activeTab === 'add' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => setActiveTab('add')}
+          className={`px-6 py-2 rounded-t-lg ${
+            activeTab === 'add' ? 'bg-gray-200 text-blue-600 font-bold' : 'bg-gray-100 text-gray-500'
+          }`}
         >
           {editingId ? 'Edit News' : 'Add News'}
         </button>
       </div>
 
-      {/* Add/Edit News Form */}
-      {activeTab === 'add' && (
-        <form className="space-y-4 mt-6" onSubmit={editingId ? handleUpdateSubmit : handleAddSubmit}>
-          {/* Input fields for news form */}
-          <div>
-            <label className="block text-gray-700">Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Content</label>
-            <textarea
-              name="content"
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Category</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-gray-700">Author</label>
-            <input
-              type="text"
-              name="author"
-              value={formData.author}
-              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Pin Status</label>
-            <input
-              type="text"
-              name="stype"
-              value={formData.stype}
-              onChange={(e) => setFormData({ ...formData, stype: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Type 'pin' to pin this news"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Tag</label>
-            <select
-              name="tag"
-              value={formData.tag}
-              onChange={(e) => setFormData({ ...formData, tag: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-            >
-              <option value="">Select Tag</option>
-              {tags.map((tag) => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-gray-700">Image URL</label>
-            <input
-              type="text"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700">Video URL</label>
-            <input
-              type="text"
-              name="videoUrl"
-              value={formData.videoUrl}
-              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
+      {activeTab === 'dashboard' && (
+        <div className="mt-0 bg-gray-200 p-4 rounded-b-lg">
+          <form className="flex flex-col space-y-4 mb-4">
+            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+              <input
+                type="text"
+                placeholder="Search by title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+              <select
+                value={filters.category}
+                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                className="w-full md:w-1/3 p-2 border border-gray-300 rounded"
+              >
+                <option value="">Filter by Category</option>
+                {[...new Set(newsItems.map((item) => item.category))].map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="date"
+                value={filters.date}
+                onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+                className="w-full md:w-1/3 p-2 border border-gray-300 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Filter by tag"
+                value={filters.tag}
+                onChange={(e) => setFilters({ ...filters, tag: e.target.value })}
+                className="w-full md:w-1/3 p-2 border border-gray-300 rounded"
+              />
+            </div>
+          </form>
 
-          <div className="flex space-x-4">
-            <button
-              type="submit"
-              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-            >
-              {editingId ? 'Update News' : 'Add News'}
-            </button>
-          </div>
-        </form>
+          <div className="grid xl:grid-cols-1 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+  {filteredNews.map((item) => (
+    <div
+      key={item._id}
+      className="p-4 border rounded-lg bg-white shadow-sm flex xl:flex-row flex-col items-start"
+    >
+      {/* News Image */}
+      {item.imageUrl && (
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-32 h-24 object-cover rounded-md mb-2 xl:mb-0 xl:mr-4"
+        />
+      )}
+      <div className="flex-1">
+        <h3 className="font-bold text-lg">{item.title}</h3>
+        <p className="text-sm text-gray-500">{item.category}</p>
+        <p className="text-sm text-blue-500">{getTimeDisplay(item.publishedAt)}</p>
+        <p className="text-sm text-gray-500">Tags: {item.tag.join(', ')}</p>
+      </div>
+      {/* Action Buttons */}
+      <div className="mt-4 m-2 xl:mt-0   space-x-2">
+        <button
+          onClick={() => toggleLiveStatus(item._id, item.live === 'live')}
+          className={`px-4 py-2 sm:m-2 rounded ${
+            item.live === 'live' ? 'bg-gray-500' : 'bg-red-500 hover:bg-red-600'
+          } text-white`}
+        >
+          {item.live === 'live' ? 'Unlive' : 'Go Live'}
+        </button>
+        <button
+          onClick={() => handlePin(item._id)}
+          className="bg-green-500 sm:m-2 text-white px-4 py-2 rounded"
+        >
+          Pin
+        </button>
+        <button
+          onClick={() => handleEdit(item)}
+          className="bg-blue-500 sm:m-2 text-white px-4 py-2 rounded"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => handleDelete(item._id)}
+          className="bg-red-500 sm:m-2 text-white px-4 py-2 rounded"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+        </div>
       )}
 
-      {/* View News Tab */}
-      {activeTab === 'all' && (
-        <div className="mt-6">
-          {/* Category and Tag Filters */}
-          <div className="flex space-x-4 mb-4">
-            <select
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              value={selectedCategory}
-              className="p-2 border border-gray-300 rounded"
+      {activeTab === 'add' && (
+        <form onSubmit={handleAddEditSubmit} className="bg-gray-200 p-4 rounded-b-lg space-y-4">
+          <input
+            type="text"
+            placeholder="Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <textarea
+            placeholder="Content"
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <select
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded"
+          >
+            <option value="">Select Category</option>
+            {['Politics', 'Sports', 'Technology', 'Entertainment', 'World', 'Local'].map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="Author"
+            value={formData.author}
+            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Tags (comma-separated)"
+            value={formData.tag.join(', ')}
+            onChange={(e) => setFormData({ ...formData, tag: e.target.value.split(',').map((tag) => tag.trim()) })}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Image URL"
+            value={formData.imageUrl}
+            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Video URL"
+            value={formData.videoUrl}
+            onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            {editingId ? 'Update News' : 'Add News'}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({
+                  title: '',
+                  content: '',
+                  category: '',
+                  author: '',
+                  stype: '',
+                  live: '',
+                  tag: [],
+                  imageUrl: '',
+                  videoUrl: '',
+                  mediaPreference: 'image',
+                });
+                setEditingId(null);
+              }}
+              className="bg-gray-500 text-white px-4 py-2 rounded ml-2"
             >
-              <option value="">Filter by category</option>
-              {[...new Set(newsItems.map(news => news.category))].map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="text"
-              placeholder="Filter by tag"
-              value={selectedTag}
-              onChange={(e) => setSelectedTag(e.target.value)}
-              className="p-2 border border-gray-300 rounded"
-            />
-          </div>
-
-          {/* Display News List */}
-          {filteredNewsItems.length === 0 ? (
-            <p>No news available.</p>
-          ) : (
-            <ul className="space-y-4">
-              {filteredNewsItems.map((news) => (
-                <li key={news._id} className="border p-4 rounded-lg">
-                  <h3 className="text-xl font-bold">{news.title}</h3>
-                  <p>{news.content}</p>
-                  <p><strong>Category:</strong> {news.category}</p>
-                  <p><strong>Author:</strong> {news.author}</p>
-                  <p><strong>Tags:</strong> {news.tag.join(', ')}</p>
-                  <button
-                    onClick={() => handleEdit(news)}
-                    className="text-blue-500 mt-2"
-                  >
-                    Edit
-                  </button>
-                </li>
-              ))}
-            </ul>
+              Cancel Edit
+            </button>
           )}
-        </div>
+        </form>
       )}
     </div>
   );
